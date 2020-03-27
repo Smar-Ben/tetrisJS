@@ -1,0 +1,47 @@
+.App {
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    width: 100vw;
+    height: 100vh;
+    background-image: url(https://i.ebayimg.com/images/g/HCgAAOxy63FSrBOH/s-l300.jpg);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+}
+
+.Screen {
+    width: 800px;
+    height: 600px;
+    border: solid skyblue;
+    background-color: white;
+    z-index: 1;
+    /* cursor: none; */
+    position: relative;
+}
+
+.hidden {
+    visibility: hidden;
+}
+.main {
+    z-index: 7;
+    position: absolute;
+    top: 0;
+    left: 150;
+}
+
+.center {
+    position: absolute;
+    top: 257px;
+    left: 357px;
+    z-index: 10;
+    cursor: pointer;
+}
+
+.brick {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    z-index: 2;
+}

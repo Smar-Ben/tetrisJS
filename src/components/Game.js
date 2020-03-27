@@ -4,12 +4,65 @@ import playButton from "../asset/play-button.png";
 import Board from "./Board";
 import useInterval from "../hooks/useInteval";
 import useEvent from "../hooks/useEvent";
+
 export const CANVAS = { width: 800, height: 600 };
 export const TETRIS = {
     GRID: { width: 250 + 20, height: 500 + 40, col: 10, row: 20 },
     COORD: { x: 265, y: 30 },
     SQUARE: 25
 };
+export const piece = [
+    [
+        [0, 1, 0, 0],
+        [1, 1, 1, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0]
+    ],
+    [
+        [0, 1, 0, 0],
+        [0, 1, 0, 0],
+        [0, 1, 0, 0],
+        [0, 1, 0, 0]
+    ],
+    [
+        [0, 1, 1, 0],
+        [0, 1, 0, 0],
+        [0, 1, 0, 0],
+        [0, 1, 0, 0]
+    ],
+    [
+        [1, 1, 0, 0],
+        [0, 1, 0, 0],
+        [0, 1, 0, 0],
+        [0, 0, 0, 0]
+    ],
+    [
+        [1, 1, 0, 0],
+        [1, 1, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0]
+    ],
+    [
+        [0, 0, 0, 0],
+        [0, 1, 1, 0],
+        [1, 1, 0, 0],
+        [0, 0, 0, 0]
+    ],
+    [
+        [0, 0, 0, 0],
+        [1, 1, 0, 0],
+        [0, 1, 1, 0],
+        [0, 0, 0, 0]
+    ]
+];
+
+const emptyPiece = [
+    [0, 0, 0, 0],
+    [0, 0, 0, 0],
+    [0, 0, 0, 0],
+    [0, 0, 0, 0]
+];
+export const color = ["red", "cyan", "green", "yellow", "magenta", "orange", "pink"];
 
 function Ecran() {
     const brickCanvas = useRef(null);
@@ -22,30 +75,79 @@ function Ecran() {
     }
     const [tab, setTab] = useState(tabInter);
     const [isFalling, setFalling] = useState(false);
-    const [posX, setPos] = useState(4);
+    const [posX, setPos] = useState(3);
+    const [count, setCount] = useState(0);
     const [isPlaying, setPlaying] = useState(false);
     const [speed, setSpeed] = useState(false);
-    const [count, setCount] = useState(0);
+    const [playing, setPiece] = useState(null);
     const level = 1;
 
     useEffect(() => {
+        const updateCanvas = () => {
+            const ctx = brickCanvas.current.getContext("2d");
+            //création des canvas
+
+            if (ctx) {
+                ctx.clearRect(0, 0, CANVAS.width, CANVAS.height);
+
+                //position  des cubes
+                /* for (let i = 0; i < 10; i++) {
+                
+                ctx.fillRect(
+                    TETRIS.COORD.x + 1 + i * Math.floor(TETRIS.GRID.width / TETRIS.GRID.col),
+                    TETRIS.COORD.y + 1 + (19 - i) * Math.floor(TETRIS.GRID.width / TETRIS.GRID.col),
+                    TETRIS.SQUARE,
+                    TETRIS.SQUARE
+                );
+            } */
+                for (let i = 0; i < TETRIS.GRID.row; i++) {
+                    for (let j = 0; j < TETRIS.GRID.col; j++) {
+                        if (tab[i][j] === 0) {
+                        } else {
+                            ctx.fillStyle = "red";
+                            ctx.fillRect(
+                                TETRIS.COORD.x +
+                                    1 +
+                                    j * Math.floor(TETRIS.GRID.width / TETRIS.GRID.col),
+                                TETRIS.COORD.y +
+                                    1 +
+                                    i * Math.floor(TETRIS.GRID.width / TETRIS.GRID.col),
+                                TETRIS.SQUARE,
+                                TETRIS.SQUARE
+                            );
+                        }
+                    }
+                }
+            }
+        };
         updateCanvas();
     }, [tab]);
+
     const handler = event => {
         if (isFalling) {
-            console.log(count);
+            let tetrisGrid;
             switch (event.keyCode) {
                 //bouton gauche
                 case 37:
-                    move(-1);
+                    tetrisGrid = place(count - 1, posX, tab.slice(), emptyPiece);
+                    tetrisGrid = place(count - 1, posX - 1, tetrisGrid, playing);
+                    if (tetrisGrid) {
+                        setTab(tetrisGrid);
+                        setPos(posX - 1);
+                    }
                     break;
                 //bouton haut
                 case 38:
-                    rotate();
+                    //rotate();
                     break;
                 //bouton de droite
                 case 39:
-                    move(1);
+                    tetrisGrid = place(count - 1, posX, tab.slice(), emptyPiece);
+                    tetrisGrid = place(count - 1, posX + 1, tetrisGrid, playing);
+                    if (tetrisGrid) {
+                        setTab(tetrisGrid);
+                        setPos(posX + 1);
+                    }
                     break;
                 //bouton du bas
                 case 40:
@@ -56,109 +158,50 @@ function Ecran() {
         }
     };
 
-    //fonction qui fait tourner un pièce, à défénir plus tard
-    const rotate = () => {};
-
-    const move = offsetX => {
-        if (count + 1 <= 19 && offsetX + posX < 9 && offsetX + posX > 0) {
-            const tetrisGrid = tab.slice();
-            if (count >= 1 && count + 1 <= 19) {
-                tetrisGrid[0 + count - 1][posX] = 0;
-                tetrisGrid[1 + count - 1][posX + 1] = 0;
-                tetrisGrid[1 + count - 1][posX] = 0;
-                tetrisGrid[1 + count - 1][posX - 1] = 0;
-            }
-            tetrisGrid[0 + count - 1][posX + offsetX] = 1;
-            tetrisGrid[1 + count - 1][posX + 1 + offsetX] = 1;
-            tetrisGrid[1 + count - 1][posX + offsetX] = 1;
-            tetrisGrid[1 + count - 1][posX - 1 + offsetX] = 1;
-            setTab(tetrisGrid);
-            setPos(posX + offsetX);
-        }
-    };
-
-    /* useEffect(() => {
-        console.log(count);
-        window.addEventListener("keydown", handler);
-
-        // clean up
-        return () => window.removeEventListener("keydown", handler);
-    }, []); */
-
     const stopSpeed = event => {
-        if (event.keyCode == 40 && speed === true) {
+        if (event.keyCode === 40 && speed === true) {
             setSpeed(false);
         }
     };
     useEvent("keydown", handler);
     useEvent("keyup", stopSpeed);
-    /* useEffect(() => {
-        alert("ok");
-    }, [count]); */
-    const updateCanvas = () => {
-        const ctx = brickCanvas.current.getContext("2d");
-        //création des canvas
 
-        if (ctx) {
-            ctx.clearRect(0, 0, CANVAS.width, CANVAS.height);
-
-            //position  des cubes
-            /* for (let i = 0; i < 10; i++) {
-            
-            ctx.fillRect(
-                TETRIS.COORD.x + 1 + i * Math.floor(TETRIS.GRID.width / TETRIS.GRID.col),
-                TETRIS.COORD.y + 1 + (19 - i) * Math.floor(TETRIS.GRID.width / TETRIS.GRID.col),
-                TETRIS.SQUARE,
-                TETRIS.SQUARE
-            );
-        } */
-            const tetrisGrid = tab;
-            for (let i = 0; i < TETRIS.GRID.row; i++) {
-                for (let j = 0; j < TETRIS.GRID.col; j++) {
-                    if (tetrisGrid[i][j] === 0) {
-                    } else {
-                        ctx.fillStyle = "red";
-                        ctx.fillRect(
-                            TETRIS.COORD.x +
-                                1 +
-                                j * Math.floor(TETRIS.GRID.width / TETRIS.GRID.col),
-                            TETRIS.COORD.y +
-                                1 +
-                                i * Math.floor(TETRIS.GRID.width / TETRIS.GRID.col),
-                            TETRIS.SQUARE,
-                            TETRIS.SQUARE
-                        );
+    const place = (x, y, grid, piece) => {
+        for (let i = x; i < x + 4; i++) {
+            for (let j = y; j < y + 4; j++) {
+                if (i >= 0 && i <= 19 && j >= 0 && j <= 9) {
+                    grid[i][j] = piece[i - x][j - y];
+                } else {
+                    if (piece[i - x][j - y] === 1) {
+                        return null;
                     }
                 }
             }
         }
+        return grid;
     };
-
     const falling = () => {
         if (count + 1 <= 19) {
-            const tetrisGrid = tab.slice();
-            if (count >= 1 && count + 1 <= 19) {
-                tetrisGrid[0 + count - 1][posX] = 0;
-                tetrisGrid[1 + count - 1][posX + 1] = 0;
-                tetrisGrid[1 + count - 1][posX] = 0;
-                tetrisGrid[1 + count - 1][posX - 1] = 0;
+            let tetrisGrid = tab.slice();
+            if (count - 1 >= 0) {
+                for (let i = 0; i < TETRIS.GRID.col; i++) {
+                    tetrisGrid[count - 1][i] = 0;
+                }
             }
-            tetrisGrid[0 + count][posX] = 1;
-            tetrisGrid[1 + count][posX + 1] = 1;
-            tetrisGrid[1 + count][posX] = 1;
-            tetrisGrid[1 + count][posX - 1] = 1;
-            setTab(tetrisGrid);
-            setCount(count + 1);
-            console.log(count);
+            tetrisGrid = place(count, posX, tetrisGrid, playing);
+            if (tetrisGrid) {
+                setTab(tetrisGrid);
+                setCount(count + 1);
+            } else {
+                setCount(100);
+            }
         }
     };
+
     const play = () => {
         setPlaying(true);
-        const tetrisGrid = tab.slice();
-        for (let i = 0; i < 10; i++) {
-            tetrisGrid[19][i] = 1;
-        }
-        setTab(tetrisGrid);
+        const num = Math.floor(Math.random() * 7);
+        setPiece(piece[num].slice());
     };
     useInterval(
         () => {

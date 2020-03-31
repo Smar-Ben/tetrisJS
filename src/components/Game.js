@@ -11,52 +11,138 @@ export const TETRIS = {
     COORD: { x: 265, y: 30 },
     SQUARE: 25
 };
-export const piece = [
+export const tokenModels = [
     [
-        [0, 1, 0, 0],
-        [1, 1, 1, 0],
-        [0, 0, 0, 0],
-        [0, 0, 0, 0]
+        [
+            [0, 1, 0, 0],
+            [1, 1, 1, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0]
+        ],
+        [
+            [0, 1, 0, 0],
+            [0, 1, 1, 0],
+            [0, 1, 0, 0],
+            [0, 0, 0, 0]
+        ],
+        [
+            [0, 0, 0, 0],
+            [1, 1, 1, 0],
+            [0, 1, 0, 0],
+            [0, 0, 0, 0]
+        ],
+        [
+            [0, 1, 0, 0],
+            [1, 1, 0, 0],
+            [0, 1, 0, 0],
+            [0, 0, 0, 0]
+        ]
     ],
     [
-        [0, 1, 0, 0],
-        [0, 1, 0, 0],
-        [0, 1, 0, 0],
-        [0, 1, 0, 0]
+        [
+            [0, 0, 0, 0],
+            [1, 1, 1, 1],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0]
+        ],
+        [
+            [0, 1, 0, 0],
+            [0, 1, 0, 0],
+            [0, 1, 0, 0],
+            [0, 1, 0, 0]
+        ]
     ],
     [
-        [0, 1, 1, 0],
-        [0, 1, 0, 0],
-        [0, 1, 0, 0],
-        [0, 1, 0, 0]
+        [
+            [1, 0, 0, 0],
+            [1, 1, 1, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0]
+        ],
+        [
+            [0, 1, 1, 0],
+            [0, 1, 0, 0],
+            [0, 1, 0, 0],
+            [0, 0, 0, 0]
+        ],
+        [
+            [0, 0, 0, 0],
+            [1, 1, 1, 0],
+            [0, 0, 1, 0],
+            [0, 0, 0, 0]
+        ],
+        [
+            [0, 1, 0, 0],
+            [0, 1, 0, 0],
+            [1, 1, 0, 0],
+            [0, 0, 0, 0]
+        ]
     ],
     [
-        [1, 1, 0, 0],
-        [0, 1, 0, 0],
-        [0, 1, 0, 0],
-        [0, 0, 0, 0]
+        [
+            [0, 0, 1, 0],
+            [1, 1, 1, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0]
+        ],
+        [
+            [0, 1, 0, 0],
+            [0, 1, 0, 0],
+            [0, 1, 1, 0],
+            [0, 0, 0, 0]
+        ],
+        [
+            [0, 0, 0, 0],
+            [1, 1, 1, 0],
+            [1, 0, 0, 0],
+            [0, 0, 0, 0]
+        ],
+        [
+            [1, 1, 0, 0],
+            [0, 1, 0, 0],
+            [0, 1, 0, 0],
+            [0, 0, 0, 0]
+        ]
     ],
     [
-        [1, 1, 0, 0],
-        [1, 1, 0, 0],
-        [0, 0, 0, 0],
-        [0, 0, 0, 0]
+        [
+            [0, 1, 1, 0],
+            [0, 1, 1, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0]
+        ]
     ],
     [
-        [0, 0, 0, 0],
-        [0, 1, 1, 0],
-        [1, 1, 0, 0],
-        [0, 0, 0, 0]
+        [
+            [0, 1, 1, 0],
+            [1, 1, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0]
+        ],
+        [
+            [0, 1, 0, 0],
+            [0, 1, 1, 0],
+            [0, 0, 1, 0],
+            [0, 0, 0, 0]
+        ]
     ],
     [
-        [0, 0, 0, 0],
-        [1, 1, 0, 0],
-        [0, 1, 1, 0],
-        [0, 0, 0, 0]
+        [
+            [1, 1, 0, 0],
+            [0, 1, 1, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0]
+        ],
+        [
+            [0, 1, 0, 0],
+            [1, 1, 0, 0],
+            [1, 0, 0, 0],
+            [0, 0, 0, 0]
+        ]
     ]
 ];
 
-const emptyPiece = [
+const emptyToken = [
     [0, 0, 0, 0],
     [0, 0, 0, 0],
     [0, 0, 0, 0],
@@ -73,23 +159,20 @@ function Ecran() {
             tabInter[i][j] = 0;
         }
     }
-    const [tab, setTab] = useState(tabInter);
-    const [isFalling, setFalling] = useState(false);
-    const [posX, setPos] = useState(3);
-    const [count, setCount] = useState(0);
+    const [grid, setGrid] = useState(tabInter);
+    const [coord, setCoord] = useState({ x: 3, y: 0 });
     const [isPlaying, setPlaying] = useState(false);
-    const [speed, setSpeed] = useState(false);
-    const [playing, setPiece] = useState(null);
-    const level = 1;
+    const [token, setToken] = useState({ num: -1, piece: null, rotate: -1 });
+    //const [isFalling, setFalling] = useState(false);
+    //const [speed, setSpeed] = useState(false);
+    //const level = 1;
 
     useEffect(() => {
         const updateCanvas = () => {
             const ctx = brickCanvas.current.getContext("2d");
             //création des canvas
-
             if (ctx) {
                 ctx.clearRect(0, 0, CANVAS.width, CANVAS.height);
-
                 //position  des cubes
                 /* for (let i = 0; i < 10; i++) {
                 
@@ -102,9 +185,9 @@ function Ecran() {
             } */
                 for (let i = 0; i < TETRIS.GRID.row; i++) {
                     for (let j = 0; j < TETRIS.GRID.col; j++) {
-                        if (tab[i][j] === 0) {
+                        if (grid[i][j] === 0) {
                         } else {
-                            ctx.fillStyle = "red";
+                            ctx.fillStyle = color[grid[i][j] - 1];
                             ctx.fillRect(
                                 TETRIS.COORD.x +
                                     1 +
@@ -121,58 +204,98 @@ function Ecran() {
             }
         };
         updateCanvas();
-    }, [tab]);
+    }, [grid]);
 
     const handler = event => {
-        if (isFalling) {
-            let tetrisGrid;
-            switch (event.keyCode) {
-                //bouton gauche
-                case 37:
-                    tetrisGrid = place(count - 1, posX, tab.slice(), emptyPiece);
-                    tetrisGrid = place(count - 1, posX - 1, tetrisGrid, playing);
-                    if (tetrisGrid) {
-                        setTab(tetrisGrid);
-                        setPos(posX - 1);
-                    }
-                    break;
-                //bouton haut
-                case 38:
-                    //rotate();
-                    break;
-                //bouton de droite
-                case 39:
-                    tetrisGrid = place(count - 1, posX, tab.slice(), emptyPiece);
-                    tetrisGrid = place(count - 1, posX + 1, tetrisGrid, playing);
-                    if (tetrisGrid) {
-                        setTab(tetrisGrid);
-                        setPos(posX + 1);
-                    }
-                    break;
-                //bouton du bas
-                case 40:
-                    setSpeed(true);
-                    break;
-                default:
-            }
+        let tetrisGrid = JSON.parse(JSON.stringify(grid));
+        const { x, y } = coord;
+        switch (event.keyCode) {
+            //bouton gauche
+            case 37:
+                tetrisGrid = place(x, y, tetrisGrid, emptyToken, 0);
+                tetrisGrid = place(x - 1, y, tetrisGrid, token.piece, token.num);
+                if (tetrisGrid) {
+                    setGrid(tetrisGrid);
+                    setCoord({ y: y, x: x - 1 });
+                }
+                break;
+            //bouton haut
+            case 38:
+                rotation();
+                break;
+            //bouton de droite
+            case 39:
+                tetrisGrid = place(x, y, tetrisGrid, emptyToken, 0);
+                tetrisGrid = place(x + 1, y, tetrisGrid, token.piece, token.num);
+                if (tetrisGrid) {
+                    setGrid(tetrisGrid);
+                    setCoord({ y: y, x: x + 1 });
+                }
+                break;
+            //bouton du bas
+            case 40:
+                //setSpeed(true);
+                break;
+            default:
         }
     };
 
-    const stopSpeed = event => {
+    const rotation = () => {
+        let { x, y } = coord;
+        let { num, rotate } = token;
+        let gridCopy = JSON.parse(JSON.stringify(grid));
+        let newGrid = place(x, y, gridCopy, emptyToken, 0);
+        if (tokenModels[num - 1].length === rotate + 1) {
+            rotate = 0;
+        } else {
+            rotate += 1;
+        }
+        newGrid = place(
+            x,
+            y,
+            newGrid,
+            JSON.parse(JSON.stringify(tokenModels[num - 1][rotate])),
+            token.num
+        );
+        const offSetx = TETRIS.GRID.col - (x + 3) < x ? -1 : 1;
+        while (!newGrid) {
+            x += offSetx;
+            gridCopy = JSON.parse(JSON.stringify(grid));
+            newGrid = place(x, y, gridCopy, emptyToken, 0);
+            newGrid = place(
+                x,
+                y,
+                newGrid,
+                JSON.parse(JSON.stringify(tokenModels[num - 1][rotate])),
+                token.num
+            );
+        }
+        console.log(newGrid);
+        setCoord({ x, y });
+        setToken({ num: token.num, piece: tokenModels[num - 1][rotate], rotate: rotate });
+        setGrid(newGrid);
+    };
+
+    /* const stopSpeed = event => {
         if (event.keyCode === 40 && speed === true) {
             setSpeed(false);
         }
-    };
+    }; */
     useEvent("keydown", handler);
-    useEvent("keyup", stopSpeed);
+    //useEvent("keyup", stopSpeed);
 
-    const place = (x, y, grid, piece) => {
+    const place = (x, y, grid, token, num) => {
+        console.log(x);
         for (let i = x; i < x + 4; i++) {
             for (let j = y; j < y + 4; j++) {
-                if (i >= 0 && i <= 19 && j >= 0 && j <= 9) {
-                    grid[i][j] = piece[i - x][j - y];
+                if (i >= 0 && i <= 9 && j >= 0 && j <= 19) {
+                    if (token[j - y][i - x] === 1) {
+                        grid[j][i] = num;
+                    } else {
+                        grid[j][i] = 0;
+                    }
                 } else {
-                    if (piece[i - x][j - y] === 1) {
+                    if (token[j - y][i - x] === 1) {
                         return null;
                     }
                 }
@@ -180,36 +303,43 @@ function Ecran() {
         }
         return grid;
     };
+
     const falling = () => {
-        if (count + 1 <= 19) {
-            let tetrisGrid = tab.slice();
-            if (count - 1 >= 0) {
+        if (coord.y + 1 <= 19) {
+            let tetrisGrid = grid.slice();
+            if (coord.y - 1 >= 0) {
                 for (let i = 0; i < TETRIS.GRID.col; i++) {
-                    tetrisGrid[count - 1][i] = 0;
+                    tetrisGrid[coord.y - 1][i] = 0;
                 }
             }
-            tetrisGrid = place(count, posX, tetrisGrid, playing);
+            tetrisGrid = place(coord.x, coord.y, tetrisGrid, token.piece, token.num);
             if (tetrisGrid) {
-                setTab(tetrisGrid);
-                setCount(count + 1);
-            } else {
-                setCount(100);
+                setGrid(tetrisGrid);
+                setCoord({ y: coord.y + 1 });
             }
+            setCoord({ y: 100 });
         }
     };
 
     const play = () => {
         setPlaying(true);
-        const num = Math.floor(Math.random() * 7);
-        setPiece(piece[num].slice());
+        const num = Math.floor(1 + Math.random() * 7);
+        let tetrisGrid = JSON.parse(JSON.stringify(grid));
+        tetrisGrid = place(coord.x, coord.y, tetrisGrid, tokenModels[num - 1][0], num);
+        setGrid(tetrisGrid);
+        setToken({
+            num: num,
+            piece: JSON.parse(JSON.stringify(tokenModels[num - 1][0])),
+            rotate: 0
+        });
     };
-    useInterval(
+    /* useInterval(
         () => {
             falling();
             setFalling(true);
         },
         isPlaying ? (speed ? 10 : 1000 / level) : null
-    );
+    ); */
 
     return (
         <Fragment>

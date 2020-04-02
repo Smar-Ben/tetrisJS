@@ -349,8 +349,7 @@ function Ecran() {
     const newRandomPiece = () => {
         let { x, y } = coord;
         y = 0;
-        //const num = Math.floor(1 + Math.random() * 7);
-        const num = 3;
+        const num = Math.floor(1 + Math.random() * 7);
         x = Math.floor(TETRIS.GRID.col / 2 - tokenModels[num - 1][0].length / 2);
         let tetrisGrid = JSON.parse(JSON.stringify(grid));
         tetrisGrid = place(x, y, tetrisGrid, tokenModels[num - 1][0], num);

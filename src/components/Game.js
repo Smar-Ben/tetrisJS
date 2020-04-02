@@ -4,125 +4,7 @@ import playButton from "../asset/play-button.png";
 import Board from "./Board";
 import useInterval from "../hooks/useInteval";
 import useEvent from "../hooks/useEvent";
-
-export const CANVAS = { width: 800, height: 600 };
-export const TETRIS = {
-    GRID: { width: 250 + 20, height: 500 + 40, col: 10, row: 20 },
-    COORD: { x: 265, y: 30 },
-    SQUARE: 25
-};
-export const tokenModels = [
-    [
-        [
-            [0, 1, 0],
-            [1, 1, 1],
-            [0, 0, 0]
-        ],
-        [
-            [0, 1, 0],
-            [0, 1, 1],
-            [0, 1, 0]
-        ],
-        [
-            [0, 0, 0],
-            [1, 1, 1],
-            [0, 1, 0]
-        ],
-        [
-            [0, 1, 0],
-            [1, 1, 0],
-            [0, 1, 0]
-        ]
-    ],
-    [
-        [
-            [0, 0, 0, 0],
-            [1, 1, 1, 1],
-            [0, 0, 0, 0],
-            [0, 0, 0, 0]
-        ],
-        [
-            [0, 1, 0, 0],
-            [0, 1, 0, 0],
-            [0, 1, 0, 0],
-            [0, 1, 0, 0]
-        ]
-    ],
-    [
-        [
-            [1, 0, 0],
-            [1, 1, 1],
-            [0, 0, 0]
-        ],
-        [
-            [0, 1, 1],
-            [0, 1, 0],
-            [0, 1, 0]
-        ],
-        [
-            [0, 0, 0],
-            [1, 1, 1],
-            [0, 0, 1]
-        ],
-        [
-            [0, 1, 0],
-            [0, 1, 0],
-            [1, 1, 0]
-        ]
-    ],
-    [
-        [
-            [0, 0, 1],
-            [1, 1, 1],
-            [0, 0, 0]
-        ],
-        [
-            [0, 1, 0],
-            [0, 1, 0],
-            [0, 1, 1]
-        ],
-        [
-            [0, 0, 0],
-            [1, 1, 1],
-            [1, 0, 0]
-        ],
-        [
-            [1, 1, 0],
-            [0, 1, 0],
-            [0, 1, 0]
-        ]
-    ],
-    [
-        [
-            [1, 1],
-            [1, 1]
-        ]
-    ],
-    [
-        [
-            [0, 1, 1],
-            [1, 1, 0],
-            [0, 0, 0]
-        ],
-        [
-            [0, 1, 0],
-            [0, 1, 1],
-            [0, 0, 1]
-        ]
-    ],
-    [
-        [
-            [1, 1, 0],
-            [0, 1, 1],
-            [0, 0, 0]
-        ],
-        [
-            [0, 1, 0],
-            [1, 1, 0],
-            [1, 0, 0]
-        ]
-    ]
-];
+import { CANVAS, TETRIS, tokenModels } from "../asset/variable";
 
 export const color = ["red", "cyan", "green", "yellow", "magenta", "orange", "pink"];
 
@@ -185,7 +67,6 @@ function Ecran() {
     }, [grid]);
 
     const handler = event => {
-        console.log(hasRotated);
         let tetrisGrid = JSON.parse(JSON.stringify(grid));
         const { x, y } = coord;
         switch (event.keyCode) {
@@ -247,14 +128,7 @@ function Ecran() {
             while (!newGrid) {
                 gridCopy = JSON.parse(JSON.stringify(grid));
                 x += offSetx;
-                console.log("border");
                 newGrid = place(old_x, y - 1, gridCopy, token.piece, 0);
-                console.log("coord", y, old_x);
-                for (let i = y; i < y + 3; i++) {
-                    for (let j = old_x; j < old_x + 2; j++) {
-                        console.log(i, j, newGrid[i - 1][j]);
-                    }
-                }
                 newGrid = place(
                     x,
                     y - 1,
@@ -302,7 +176,6 @@ function Ecran() {
         const { y, x } = coord;
         let onlyZeros = 0;
         let quit = false;
-        //console.log(token.piece[0].length);
         for (let i = token.piece.length - 1; i >= 0; i--) {
             for (let j = 0; j < token.piece[i].length; j++) {
                 if (token.piece[i][j] !== 0) {
@@ -315,7 +188,6 @@ function Ecran() {
             }
             onlyZeros++;
         }
-        //console.log(offsetY);
         const rowY = y + token.piece.length - onlyZeros;
         if (rowY <= 19) {
             for (let i = x; i < x + token.piece[0].length; i++) {

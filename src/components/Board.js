@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, Fragment } from "react";
-import { CANVAS, TETRIS } from "./Game";
+import { CANVAS, TETRIS } from "../asset/variable";
 
 function drawTable(canvasRef) {
     const ctx = canvasRef.current.getContext("2d");

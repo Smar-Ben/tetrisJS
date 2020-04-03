@@ -14,7 +14,11 @@ function Ecran() {
     for (let i = 0; i < TETRIS.GRID.row; i++) {
         tabInter[i] = new Array(TETRIS.GRID.col);
         for (let j = 0; j < TETRIS.GRID.col; j++) {
-            tabInter[i][j] = 0;
+            if (j === 9 && (i <= 5 || i >= 15)) {
+                tabInter[i][j] = 4;
+            } else {
+                tabInter[i][j] = 0;
+            }
         }
     }
     const [grid, setGrid] = useState(tabInter);
@@ -69,15 +73,41 @@ function Ecran() {
     const handler = event => {
         let tetrisGrid = JSON.parse(JSON.stringify(grid));
         const { x, y } = coord;
+        let obstacle = false;
+        let onlyZeros = 0;
+        let quit = false;
         switch (event.keyCode) {
             //bouton gauche
             case 37:
                 setRotation(true);
-                tetrisGrid = place(x, y - 1, tetrisGrid, token.piece, 0);
-                tetrisGrid = place(x - 1, y - 1, tetrisGrid, token.piece, token.num);
-                if (tetrisGrid) {
-                    setGrid(tetrisGrid);
-                    setCoord({ y: y, x: x - 1 });
+                for (let i = 0; i < token.piece[i].length; i++) {
+                    for (let j = 0; j < token.piece.length; j++) {
+                        if (token.piece[j][i] !== 0) {
+                            quit = true;
+                            break;
+                        }
+                    }
+                    if (quit) {
+                        break;
+                    } else {
+                        onlyZeros++;
+                    }
+                }
+                for (let i = 0; i < token.piece.length; i++) {
+                    if (
+                        grid[coord.y + i - 1][coord.x + onlyZeros - 1] !== 0 &&
+                        token.piece[i][onlyZeros] === 1
+                    ) {
+                        obstacle = true;
+                    }
+                }
+                if (!obstacle) {
+                    tetrisGrid = place(x, y - 1, tetrisGrid, token.piece, 0);
+                    tetrisGrid = place(x - 1, y - 1, tetrisGrid, token.piece, token.num);
+                    if (tetrisGrid) {
+                        setGrid(tetrisGrid);
+                        setCoord({ y: y, x: x - 1 });
+                    }
                 }
                 setRotation(false);
                 break;
@@ -88,11 +118,37 @@ function Ecran() {
             //bouton de droite
             case 39:
                 setRotation(true);
-                tetrisGrid = place(x, y - 1, tetrisGrid, token.piece, 0);
-                tetrisGrid = place(x + 1, y - 1, tetrisGrid, token.piece, token.num);
-                if (tetrisGrid) {
-                    setGrid(tetrisGrid);
-                    setCoord({ y: y, x: x + 1 });
+                for (let i = token.piece[0].length - 1; i >= 0; i--) {
+                    for (let j = 0; j < token.piece.length; j++) {
+                        if (token.piece[j][i] !== 0) {
+                            quit = true;
+                            break;
+                        }
+                    }
+                    if (quit) {
+                        break;
+                    } else {
+                        onlyZeros++;
+                    }
+                }
+                for (let i = 0; i < token.piece.length; i++) {
+                    if (coord.x - onlyZeros + token.piece[0].length < 10) {
+                        if (
+                            grid[coord.y + i - 1][coord.x - onlyZeros + token.piece[0].length] !==
+                                0 &&
+                            token.piece[i][token.piece[0].length - 1 - onlyZeros] !== 0
+                        ) {
+                            obstacle = true;
+                        }
+                    }
+                }
+                if (!obstacle) {
+                    tetrisGrid = place(x, y - 1, tetrisGrid, token.piece, 0);
+                    tetrisGrid = place(x + 1, y - 1, tetrisGrid, token.piece, token.num);
+                    if (tetrisGrid) {
+                        setGrid(tetrisGrid);
+                        setCoord({ y: y, x: x + 1 });
+                    }
                 }
                 setRotation(false);
                 break;
@@ -199,6 +255,7 @@ function Ecran() {
         }
         return false;
     };
+
     const falling = () => {
         if (!nextPiece) {
             setRotation(true);
@@ -218,6 +275,7 @@ function Ecran() {
             setNextPiece(false);
         }
     };
+
     const newRandomPiece = () => {
         let { x, y } = coord;
         y = 0;
@@ -233,6 +291,7 @@ function Ecran() {
         });
         setCoord({ x: x, y: y + 1 });
     };
+
     const play = () => {
         setPlaying(true);
         newRandomPiece();

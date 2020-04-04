@@ -14,7 +14,7 @@ function Ecran() {
     for (let i = 0; i < TETRIS.GRID.row; i++) {
         tabInter[i] = new Array(TETRIS.GRID.col);
         for (let j = 0; j < TETRIS.GRID.col; j++) {
-            if (j === 9 && (i <= 5 || i >= 15)) {
+            if ((j === 0 || j === 9) && (i <= 5 || i >= 15)) {
                 tabInter[i][j] = 4;
             } else {
                 tabInter[i][j] = 0;
@@ -71,8 +71,6 @@ function Ecran() {
     }, [grid]);
 
     const handler = event => {
-        let tetrisGrid = JSON.parse(JSON.stringify(grid));
-        const { x, y } = coord;
         let obstacle = false;
         let onlyZeros = 0;
         let quit = false;
@@ -94,20 +92,17 @@ function Ecran() {
                     }
                 }
                 for (let i = 0; i < token.piece.length; i++) {
-                    if (
-                        grid[coord.y + i - 1][coord.x + onlyZeros - 1] !== 0 &&
-                        token.piece[i][onlyZeros] === 1
-                    ) {
-                        obstacle = true;
+                    if (coord.y + i - 1 < 20) {
+                        if (
+                            grid[coord.y + i - 1][coord.x + onlyZeros - 1] !== 0 &&
+                            token.piece[i][onlyZeros] === 1
+                        ) {
+                            obstacle = true;
+                        }
                     }
                 }
                 if (!obstacle) {
-                    tetrisGrid = place(x, y - 1, tetrisGrid, token.piece, 0);
-                    tetrisGrid = place(x - 1, y - 1, tetrisGrid, token.piece, token.num);
-                    if (tetrisGrid) {
-                        setGrid(tetrisGrid);
-                        setCoord({ y: y, x: x - 1 });
-                    }
+                    move(-1);
                 }
                 setRotation(false);
                 break;
@@ -132,7 +127,7 @@ function Ecran() {
                     }
                 }
                 for (let i = 0; i < token.piece.length; i++) {
-                    if (coord.x - onlyZeros + token.piece[0].length < 10) {
+                    if (coord.x - onlyZeros + token.piece[0].length < 10 && coord.y + i - 1 < 20) {
                         if (
                             grid[coord.y + i - 1][coord.x - onlyZeros + token.piece[0].length] !==
                                 0 &&
@@ -143,12 +138,7 @@ function Ecran() {
                     }
                 }
                 if (!obstacle) {
-                    tetrisGrid = place(x, y - 1, tetrisGrid, token.piece, 0);
-                    tetrisGrid = place(x + 1, y - 1, tetrisGrid, token.piece, token.num);
-                    if (tetrisGrid) {
-                        setGrid(tetrisGrid);
-                        setCoord({ y: y, x: x + 1 });
-                    }
+                    move(1);
                 }
                 setRotation(false);
                 break;
@@ -158,6 +148,17 @@ function Ecran() {
                 setSpeed(true);
                 break;
             default:
+        }
+    };
+
+    const move = offsetX => {
+        const { x, y } = coord;
+        let tetrisGrid = JSON.parse(JSON.stringify(grid));
+        tetrisGrid = place(x, y - 1, tetrisGrid, token.piece, 0);
+        tetrisGrid = place(x + offsetX, y - 1, tetrisGrid, token.piece, token.num);
+        if (tetrisGrid) {
+            setGrid(tetrisGrid);
+            setCoord({ y: y, x: x + offsetX });
         }
     };
 
@@ -245,9 +246,18 @@ function Ecran() {
             onlyZeros++;
         }
         const rowY = y + token.piece.length - onlyZeros;
+        console.log(y);
         if (rowY <= 19) {
             for (let i = x; i < x + token.piece[0].length; i++) {
-                if (grid[rowY][i] !== 0) {
+                console.log(
+                    token.piece.length - onlyZeros - 1,
+                    i - x,
+                    token.piece[token.piece.length - onlyZeros - 1][i - x]
+                );
+                if (
+                    grid[rowY][i] !== 0 &&
+                    token.piece[token.piece.length - onlyZeros - 1][i - x] === 1
+                ) {
                     setNextPiece(true);
                     return true;
                 }
@@ -261,11 +271,11 @@ function Ecran() {
             setRotation(true);
             let tetrisGrid = JSON.parse(JSON.stringify(grid));
             tetrisGrid = place(coord.x, coord.y - 1, tetrisGrid, token.piece, 0);
-            //checkPiece();
             tetrisGrid = place(coord.x, coord.y, tetrisGrid, token.piece, token.num);
             if (tetrisGrid) {
                 setGrid(tetrisGrid);
                 setCoord({ y: coord.y + 1, x: coord.x });
+                setNextPiece(checkPiece());
             } else {
                 setNextPiece(true);
             }

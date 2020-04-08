@@ -78,7 +78,7 @@ function Ecran() {
             //bouton gauche
             case 37:
                 setRotation(true);
-                for (let i = 0; i < token.piece[i].length; i++) {
+                /* for (let i = 0; i < token.piece[i].length; i++) {
                     for (let j = 0; j < token.piece.length; j++) {
                         if (token.piece[j][i] !== 0) {
                             quit = true;
@@ -100,6 +100,34 @@ function Ecran() {
                             obstacle = true;
                         }
                     }
+                } */
+                for (let i = 0; i < token.piece.length; i++) {
+                    let j = 0;
+                    while (j <= token.piece[i].length) {
+                        if (token.piece[i][j] === 1 && coord.y + i - 1 < 20) {
+                            if (grid[coord.y + i - 1][coord.x + j - 1] !== 0) {
+                                if (j - 1 < 0) {
+                                    obstacle = true;
+                                } else if (token.piece[i][j - 1] !== 1) {
+                                    obstacle = true;
+                                }
+
+                                j = token.piece[i].length;
+                            }
+                        }
+                        j++;
+                    }
+                    /* if (token.piece[i][j] === 1 && coord.y + i - 1 < 20) {
+                        if (grid[coord.y + i - 1][coord.x + j] !== 0) {
+                            obstacle = true;
+                        }
+                    }  else {
+                        while (j > 0) {
+                            if (token.piece[i][j] === 0 && coord.y + i - 1 < 20) {
+                                if(grid[coord.y + i - 1][coord.x + j - 1] !== 0)
+                            }
+                        }
+                    } */
                 }
                 if (!obstacle) {
                     move(-1);
@@ -113,7 +141,23 @@ function Ecran() {
             //bouton de droite
             case 39:
                 setRotation(true);
-                for (let i = token.piece[0].length - 1; i >= 0; i--) {
+                for (let i = 0; i < token.piece.length; i++) {
+                    let j = token.piece[i].length - 1;
+                    while (j >= 0) {
+                        if (token.piece[i][j] === 1 && coord.y + i - 1 < 20) {
+                            if (grid[coord.y + i - 1][coord.x + j + 1] !== 0) {
+                                if (j + 1 >= token.piece.length) {
+                                    obstacle = true;
+                                } else if (token.piece[i][j + 1] !== 1) {
+                                    obstacle = true;
+                                }
+                            }
+                            j = -1;
+                        }
+                        j--;
+                    }
+                }
+                /* for (let i = token.piece[0].length - 1; i >= 0; i--) {
                     for (let j = 0; j < token.piece.length; j++) {
                         if (token.piece[j][i] !== 0) {
                             quit = true;
@@ -136,7 +180,7 @@ function Ecran() {
                             obstacle = true;
                         }
                     }
-                }
+                } */
                 if (!obstacle) {
                     move(1);
                 }
@@ -156,7 +200,6 @@ function Ecran() {
         let tetrisGrid = JSON.parse(JSON.stringify(grid));
         tetrisGrid = place(x, y - 1, tetrisGrid, token.piece, 0);
         tetrisGrid = place(x + offsetX, y - 1, tetrisGrid, token.piece, token.num);
-        console.log(x, y, "move", checkPiece(offsetX, -1));
         if (tetrisGrid) {
             setGrid(tetrisGrid);
             setCoord({ y: y, x: x + offsetX });

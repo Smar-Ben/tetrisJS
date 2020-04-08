@@ -72,35 +72,10 @@ function Ecran() {
 
     const handler = (event) => {
         let obstacle = false;
-        let onlyZeros = 0;
-        let quit = false;
         switch (event.keyCode) {
             //bouton gauche
             case 37:
                 setRotation(true);
-                /* for (let i = 0; i < token.piece[i].length; i++) {
-                    for (let j = 0; j < token.piece.length; j++) {
-                        if (token.piece[j][i] !== 0) {
-                            quit = true;
-                            break;
-                        }
-                    }
-                    if (quit) {
-                        break;
-                    } else {
-                        onlyZeros++;
-                    }
-                }
-                for (let i = 0; i < token.piece.length; i++) {
-                    if (coord.y + i - 1 < 20) {
-                        if (
-                            grid[coord.y + i - 1][coord.x + onlyZeros - 1] !== 0 &&
-                            token.piece[i][onlyZeros] === 1
-                        ) {
-                            obstacle = true;
-                        }
-                    }
-                } */
                 for (let i = 0; i < token.piece.length; i++) {
                     let j = 0;
                     while (j <= token.piece[i].length) {
@@ -117,17 +92,6 @@ function Ecran() {
                         }
                         j++;
                     }
-                    /* if (token.piece[i][j] === 1 && coord.y + i - 1 < 20) {
-                        if (grid[coord.y + i - 1][coord.x + j] !== 0) {
-                            obstacle = true;
-                        }
-                    }  else {
-                        while (j > 0) {
-                            if (token.piece[i][j] === 0 && coord.y + i - 1 < 20) {
-                                if(grid[coord.y + i - 1][coord.x + j - 1] !== 0)
-                            }
-                        }
-                    } */
                 }
                 if (!obstacle) {
                     move(-1);
@@ -157,30 +121,6 @@ function Ecran() {
                         j--;
                     }
                 }
-                /* for (let i = token.piece[0].length - 1; i >= 0; i--) {
-                    for (let j = 0; j < token.piece.length; j++) {
-                        if (token.piece[j][i] !== 0) {
-                            quit = true;
-                            break;
-                        }
-                    }
-                    if (quit) {
-                        break;
-                    } else {
-                        onlyZeros++;
-                    }
-                }
-                for (let i = 0; i < token.piece.length; i++) {
-                    if (coord.x - onlyZeros + token.piece[0].length < 10 && coord.y + i - 1 < 20) {
-                        if (
-                            grid[coord.y + i - 1][coord.x - onlyZeros + token.piece[0].length] !==
-                                0 &&
-                            token.piece[i][token.piece[0].length - 1 - onlyZeros] !== 0
-                        ) {
-                            obstacle = true;
-                        }
-                    }
-                } */
                 if (!obstacle) {
                     move(1);
                 }

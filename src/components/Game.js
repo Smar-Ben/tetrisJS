@@ -70,7 +70,7 @@ function Ecran() {
         updateCanvas();
     }, [grid]);
 
-    const handler = event => {
+    const handler = (event) => {
         let obstacle = false;
         let onlyZeros = 0;
         let quit = false;
@@ -151,14 +151,16 @@ function Ecran() {
         }
     };
 
-    const move = offsetX => {
+    const move = (offsetX) => {
         const { x, y } = coord;
         let tetrisGrid = JSON.parse(JSON.stringify(grid));
         tetrisGrid = place(x, y - 1, tetrisGrid, token.piece, 0);
         tetrisGrid = place(x + offsetX, y - 1, tetrisGrid, token.piece, token.num);
+        console.log(x, y, "move", checkPiece(offsetX, -1));
         if (tetrisGrid) {
             setGrid(tetrisGrid);
             setCoord({ y: y, x: x + offsetX });
+            setNextPiece(checkPiece(offsetX, -1));
         }
     };
 
@@ -201,7 +203,7 @@ function Ecran() {
         }
     };
 
-    const handlerUp = event => {
+    const handlerUp = (event) => {
         if (event.keyCode === 40 && speed === true) {
             setSpeed(false);
             setRotation(false);
@@ -229,38 +231,43 @@ function Ecran() {
         return grid;
     };
 
-    const checkPiece = () => {
+    const checkPiece = (offSetx = 0, offsetY = 0) => {
         const { y, x } = coord;
-        let onlyZeros = 0;
-        let quit = false;
-        for (let i = token.piece.length - 1; i >= 0; i--) {
+        for (let i = 0; i < token.piece.length; i++) {
             for (let j = 0; j < token.piece[i].length; j++) {
-                if (token.piece[i][j] !== 0) {
-                    quit = true;
-                    break;
+                if (token.piece[i][j] === 1 && y + i + 1 + offsetY <= 19) {
+                    if (grid[y + i + 1 + offsetY][x + j + offSetx] !== 0) {
+                        if (i + 1 >= token.piece.length) {
+                            return true;
+                        } else {
+                            if (j + offSetx >= token.piece[i].length || j + offSetx < 0) {
+                                return true;
+                            } else {
+                                if (token.piece[i + 1][j + offSetx] === 0) {
+                                    return true;
+                                }
+                            }
+                        }
+                    }
                 }
-            }
-            if (quit) {
-                break;
-            }
-            onlyZeros++;
-        }
-        const rowY = y + token.piece.length - onlyZeros;
-        console.log(y);
-        if (rowY <= 19) {
-            for (let i = x; i < x + token.piece[0].length; i++) {
-                console.log(
-                    token.piece.length - onlyZeros - 1,
-                    i - x,
-                    token.piece[token.piece.length - onlyZeros - 1][i - x]
-                );
-                if (
-                    grid[rowY][i] !== 0 &&
-                    token.piece[token.piece.length - onlyZeros - 1][i - x] === 1
-                ) {
-                    setNextPiece(true);
-                    return true;
-                }
+                /* if (token.piece[i][j] === 1 && y + i + 1 + offsetY <= 19) {
+                    if (i + 1 >= token.piece[i].length) {
+                        if (grid[y + i + 1 + offsetY][x + j + offSetx] !== 0) {
+                            offSetx != 0 &&
+                                console.log(
+                                    y + i + 1 + offSetx,
+                                    x + j + offSetx,
+                                    grid[y + i + 1 + offsetY][x + j + offSetx]
+                                );
+                            return true;
+                        }
+                    } else if (
+                        grid[y + i + 1 + offsetY][x + j + offSetx] !== 0 &&
+                        token.piece[i + 1][j] === 0
+                    ) {
+                        return true;
+                    }
+                } */
             }
         }
         return false;
@@ -268,6 +275,7 @@ function Ecran() {
 
     const falling = () => {
         if (!nextPiece) {
+            //console.log(coord.x, coord.y, "fall", checkPiece());
             setRotation(true);
             let tetrisGrid = JSON.parse(JSON.stringify(grid));
             tetrisGrid = place(coord.x, coord.y - 1, tetrisGrid, token.piece, 0);
@@ -297,7 +305,7 @@ function Ecran() {
         setToken({
             num: num,
             piece: JSON.parse(JSON.stringify(tokenModels[num - 1][0])),
-            rotate: 0
+            rotate: 0,
         });
         setCoord({ x: x, y: y + 1 });
     };

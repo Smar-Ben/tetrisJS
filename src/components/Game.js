@@ -229,38 +229,39 @@ function Ecran() {
         let { x, y } = coord;
         y = 0;
         setSpeed(false);
-        const num = Math.floor(1 + Math.random() * 7);
+        const num = 6;
+        //const num = Math.floor(1 + Math.random() * 7);
         x = Math.floor(TETRIS.GRID.col / 2 - tokenModels[num - 1][0].length / 2);
         let tetrisGrid = checkLigne();
         if (valid(tokenModels[num - 1][0], grid, 0, 1, x, y)) {
-            setNextPiece(checkPiece(tokenModels[num - 1][0], grid, 0, 0, x, y));
-            tetrisGrid = place(x, y, tetrisGrid, tokenModels[num - 1][0], num);
-            setGrid(tetrisGrid);
-            setToken({
-                num: num,
-                piece: JSON.parse(JSON.stringify(tokenModels[num - 1][0])),
-                rotate: 0,
-            });
-            setCoord({ x: x, y: y + 1 });
+            placeNewPiece(x, y, num, tetrisGrid);
         } else {
             let gameOver = true;
             for (let i = 1; i < lengthPiece(tokenModels[num - 1][0]); i++) {
                 y -= 1;
                 if (valid(tokenModels[num - 1][0], grid, 0, 1, x, y)) {
-                    setNextPiece(checkPiece(tokenModels[num - 1][0], grid, 0, 0, x, y));
-                    tetrisGrid = place(x, y, tetrisGrid, tokenModels[num - 1][0], num);
-                    setGrid(tetrisGrid);
-                    setToken({
-                        num: num,
-                        piece: JSON.parse(JSON.stringify(tokenModels[num - 1][0])),
-                        rotate: 0,
-                    });
-                    setCoord({ x: x, y: y + 1 });
+                    placeNewPiece(x, y, num, tetrisGrid);
                     gameOver = false;
                     i = lengthPiece(tokenModels[num - 1][0]) + 1;
                 }
             }
+            if (gameOver) {
+                setPlaying(false);
+                setGrid(tabInter);
+            }
         }
+    };
+
+    const placeNewPiece = (x, y, num, tetrisGrid) => {
+        setNextPiece(checkPiece(tokenModels[num - 1][0], grid, 0, 0, x, y));
+        tetrisGrid = place(x, y, tetrisGrid, tokenModels[num - 1][0], num);
+        setGrid(tetrisGrid);
+        setToken({
+            num: num,
+            piece: JSON.parse(JSON.stringify(tokenModels[num - 1][0])),
+            rotate: 0,
+        });
+        setCoord({ x: x, y: y + 1 });
     };
 
     const checkLigne = () => {
@@ -319,10 +320,12 @@ function Ecran() {
         }
         return count;
     };
+
     const play = () => {
         setPlaying(true);
         newRandomPiece();
     };
+
     useInterval(
         () => {
             falling();

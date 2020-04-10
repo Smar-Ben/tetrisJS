@@ -32,68 +32,37 @@ function Ecran() {
     const level = 1;
 
     useEffect(() => {
-        const updateCanvas = () => {
-            const ctx = brickCanvas.current.getContext("2d");
-            //création des canvas
-            if (ctx) {
-                ctx.clearRect(0, 0, CANVAS.width, CANVAS.height);
-                //position  des cubes
-                /* for (let i = 0; i < 10; i++) {
-                
-                ctx.fillRect(
-                    TETRIS.COORD.x + 1 + i * Math.floor(TETRIS.GRID.width / TETRIS.GRID.col),
-                    TETRIS.COORD.y + 1 + (19 - i) * Math.floor(TETRIS.GRID.width / TETRIS.GRID.col),
-                    TETRIS.SQUARE,
-                    TETRIS.SQUARE
-                );
-            } */
-                for (let i = 0; i < TETRIS.GRID.row; i++) {
-                    for (let j = 0; j < TETRIS.GRID.col; j++) {
-                        if (grid[i][j] === 0) {
-                        } else {
-                            ctx.fillStyle = color[grid[i][j] - 1];
-                            ctx.fillRect(
-                                TETRIS.COORD.x +
-                                    1 +
-                                    j * Math.floor(TETRIS.GRID.width / TETRIS.GRID.col),
-                                TETRIS.COORD.y +
-                                    1 +
-                                    i * Math.floor(TETRIS.GRID.width / TETRIS.GRID.col),
-                                TETRIS.SQUARE,
-                                TETRIS.SQUARE
-                            );
-                        }
+        const ctx = brickCanvas.current.getContext("2d");
+        //création des canvas
+        if (ctx) {
+            ctx.clearRect(0, 0, CANVAS.width, CANVAS.height);
+            for (let i = 0; i < TETRIS.GRID.row; i++) {
+                for (let j = 0; j < TETRIS.GRID.col; j++) {
+                    if (grid[i][j] === 0) {
+                    } else {
+                        ctx.fillStyle = color[grid[i][j] - 1];
+                        ctx.fillRect(
+                            TETRIS.COORD.x +
+                                1 +
+                                j * Math.floor(TETRIS.GRID.width / TETRIS.GRID.col),
+                            TETRIS.COORD.y +
+                                1 +
+                                i * Math.floor(TETRIS.GRID.width / TETRIS.GRID.col),
+                            TETRIS.SQUARE,
+                            TETRIS.SQUARE
+                        );
                     }
                 }
             }
-        };
-        updateCanvas();
+        }
     }, [grid]);
 
     const handler = (event) => {
-        let obstacle = false;
         switch (event.keyCode) {
             //bouton gauche
             case 37:
                 setRotation(true);
-                for (let i = 0; i < token.piece.length; i++) {
-                    let j = 0;
-                    while (j <= token.piece[i].length) {
-                        if (token.piece[i][j] === 1 && coord.y + i - 1 < 20) {
-                            if (grid[coord.y + i - 1][coord.x + j - 1] !== 0) {
-                                if (j - 1 < 0) {
-                                    obstacle = true;
-                                } else if (token.piece[i][j - 1] !== 1) {
-                                    obstacle = true;
-                                }
-
-                                j = token.piece[i].length;
-                            }
-                        }
-                        j++;
-                    }
-                }
-                if (!obstacle) {
+                if (validMove(-1)) {
                     move(-1);
                 }
                 setRotation(false);
@@ -105,23 +74,7 @@ function Ecran() {
             //bouton de droite
             case 39:
                 setRotation(true);
-                for (let i = 0; i < token.piece.length; i++) {
-                    let j = token.piece[i].length - 1;
-                    while (j >= 0) {
-                        if (token.piece[i][j] === 1 && coord.y + i - 1 < 20) {
-                            if (grid[coord.y + i - 1][coord.x + j + 1] !== 0) {
-                                if (j + 1 >= token.piece.length) {
-                                    obstacle = true;
-                                } else if (token.piece[i][j + 1] !== 1) {
-                                    obstacle = true;
-                                }
-                            }
-                            j = -1;
-                        }
-                        j--;
-                    }
-                }
-                if (!obstacle) {
+                if (validMove(1)) {
                     move(1);
                 }
                 setRotation(false);
@@ -133,6 +86,23 @@ function Ecran() {
                 break;
             default:
         }
+    };
+
+    const validMove = (offsetX) => {
+        for (let i = 0; i < token.piece.length; i++) {
+            for (let j = 0; j < token.piece[i].length; j++) {
+                if (token.piece[i][j] === 1) {
+                    if (grid[coord.y + i - 1][coord.x + j + offsetX] !== 0) {
+                        if (j + offsetX < 0 || j + offsetX >= token.piece[i].length) {
+                            return false;
+                        } else if (token.piece[i][j + offsetX] === 0) {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+        return true;
     };
 
     const move = (offsetX) => {
@@ -149,41 +119,108 @@ function Ecran() {
 
     const rotation = () => {
         if (!hasRotated) {
-            let { x, y } = coord;
-            let old_x = x;
+            //let old_x = x;
             let { num, rotate } = token;
-            let gridCopy = JSON.parse(JSON.stringify(grid));
-            let newGrid = place(x, y - 1, gridCopy, token.piece, 0);
             if (tokenModels[num - 1].length === rotate + 1) {
                 rotate = 0;
             } else {
                 rotate += 1;
             }
-            newGrid = place(
-                x,
-                y - 1,
-                newGrid,
-                JSON.parse(JSON.stringify(tokenModels[num - 1][rotate])),
-                token.num
-            );
-            const offSetx = TETRIS.GRID.col - (x + 3) < x ? -1 : 1;
-            while (!newGrid) {
-                gridCopy = JSON.parse(JSON.stringify(grid));
-                x += offSetx;
-                newGrid = place(old_x, y - 1, gridCopy, token.piece, 0);
-                newGrid = place(
-                    x,
-                    y - 1,
-                    newGrid,
-                    JSON.parse(JSON.stringify(tokenModels[num - 1][rotate])),
-                    token.num
-                );
+            if (validRotation(tokenModels[num - 1][rotate])) {
+                placeRotationPiece(rotate);
+            } else {
+                for (let i = 1; i <= 2; i++) {
+                    if (validRotation(tokenModels[num - 1][rotate], i, 0)) {
+                        placeRotationPiece(rotate, i, 0);
+                        break;
+                    } else if (validRotation(tokenModels[num - 1][rotate], -i, 0)) {
+                        placeRotationPiece(rotate, -i, 0);
+                        break;
+                    }
+                }
+                for (let i = 1; i <= 2; i++) {
+                    if (validRotation(tokenModels[num - 1][rotate], 0, -i)) {
+                        placeRotationPiece(rotate, 0, -i);
+                        break;
+                    }
+                }
             }
-            setCoord({ x, y });
-            setToken({ num: token.num, piece: tokenModels[num - 1][rotate], rotate: rotate });
-            setGrid(newGrid);
-            setRotation(true);
         }
+        setRotation(true);
+    };
+
+    const placeRotationPiece = (rotate, offSetx = 0, offsetY = 0) => {
+        let { x, y } = coord;
+        const { num } = token;
+        let gridCopy = JSON.parse(JSON.stringify(grid));
+        let newGrid = place(x, y - 1, gridCopy, token.piece, 0);
+        newGrid = place(
+            x + offSetx,
+            y - 1 + offsetY,
+            newGrid,
+            JSON.parse(JSON.stringify(tokenModels[num - 1][rotate])),
+            token.num
+        );
+        setNextPiece(checkPieceRotation(tokenModels[num - 1][rotate], offSetx, offsetY));
+        setCoord({ x: x + offSetx, y: y + offsetY });
+        setToken({ num: token.num, piece: tokenModels[num - 1][rotate], rotate: rotate });
+        setGrid(newGrid);
+        setRotation(true);
+    };
+
+    const validRotation = (newPiece, offSetx = 0, offsetY = 0) => {
+        for (let i = 0; i < newPiece.length; i++) {
+            for (let j = 0; j < newPiece[i].length; j++) {
+                if (newPiece[i][j] === 1) {
+                    if (
+                        coord.y + i - 1 + offsetY >= TETRIS.GRID.row ||
+                        coord.y + i - 1 + offsetY < 0 ||
+                        coord.x + j + offSetx >= TETRIS.GRID.col ||
+                        coord.x + j + offSetx < 0
+                    ) {
+                        return false;
+                    } else {
+                        if (grid[coord.y + i - 1 + offsetY][coord.x + j + offSetx] !== 0) {
+                            if (
+                                i + offsetY >= token.piece.length ||
+                                i + offsetY < 0 ||
+                                j + offSetx >= token.piece[i].length ||
+                                j + offSetx < 0
+                            ) {
+                                return false;
+                            } else if (token.piece[i + offsetY][j + offSetx] === 0) {
+                                return false;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return true;
+    };
+
+    const checkPieceRotation = (newPiece, offSetx = 0, offsetY = 0) => {
+        const { y, x } = coord;
+        console.log("offsetx", offSetx);
+        for (let i = 0; i < newPiece.length; i++) {
+            for (let j = 0; j < newPiece[i].length; j++) {
+                if (newPiece[i][j] === 1 && y + i <= 19) {
+                    if (grid[y + i + offsetY][x + j + offSetx] !== 0) {
+                        if (
+                            i + offsetY + 1 >= token.piece.length ||
+                            i + offsetY + 1 < 0 ||
+                            j + offSetx >= token.piece[i].length ||
+                            j + offSetx < 0
+                        ) {
+                            return true;
+                        } else if (token.piece[i + offsetY + 1][j + offSetx] === 0) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     };
 
     const handlerUp = (event) => {
@@ -233,24 +270,6 @@ function Ecran() {
                         }
                     }
                 }
-                /* if (token.piece[i][j] === 1 && y + i + 1 + offsetY <= 19) {
-                    if (i + 1 >= token.piece[i].length) {
-                        if (grid[y + i + 1 + offsetY][x + j + offSetx] !== 0) {
-                            offSetx != 0 &&
-                                console.log(
-                                    y + i + 1 + offSetx,
-                                    x + j + offSetx,
-                                    grid[y + i + 1 + offsetY][x + j + offSetx]
-                                );
-                            return true;
-                        }
-                    } else if (
-                        grid[y + i + 1 + offsetY][x + j + offSetx] !== 0 &&
-                        token.piece[i + 1][j] === 0
-                    ) {
-                        return true;
-                    }
-                } */
             }
         }
         return false;
@@ -280,7 +299,8 @@ function Ecran() {
     const newRandomPiece = () => {
         let { x, y } = coord;
         y = 0;
-        const num = Math.floor(1 + Math.random() * 7);
+        //const num = Math.floor(1 + Math.random() * 7);
+        const num = 2;
         x = Math.floor(TETRIS.GRID.col / 2 - tokenModels[num - 1][0].length / 2);
         let tetrisGrid = JSON.parse(JSON.stringify(grid));
         tetrisGrid = place(x, y, tetrisGrid, tokenModels[num - 1][0], num);

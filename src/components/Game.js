@@ -215,9 +215,6 @@ function Ecran() {
         if (!nextPiece) {
             setRotation(true);
             let tetrisGrid = ereaseToken();
-            if (checkPiece(token.piece, tetrisGrid)) {
-                setSpeed(false);
-            }
             setNextPiece(checkPiece(token.piece, tetrisGrid));
             tetrisGrid = place(coord.x, coord.y, tetrisGrid, token.piece, token.num);
             setGrid(tetrisGrid);
@@ -229,13 +226,12 @@ function Ecran() {
     };
 
     const newRandomPiece = () => {
-        checkLigne();
         let { x, y } = coord;
         y = 0;
-        const num = 1;
-        //const num = Math.floor(1 + Math.random() * 7);
+        setSpeed(false);
+        const num = Math.floor(1 + Math.random() * 7);
         x = Math.floor(TETRIS.GRID.col / 2 - tokenModels[num - 1][0].length / 2);
-        let tetrisGrid = JSON.parse(JSON.stringify(grid));
+        let tetrisGrid = checkLigne();
         if (valid(tokenModels[num - 1][0], grid, 0, 1, x, y)) {
             setNextPiece(checkPiece(tokenModels[num - 1][0], grid, 0, 0, x, y));
             tetrisGrid = place(x, y, tetrisGrid, tokenModels[num - 1][0], num);
@@ -264,9 +260,6 @@ function Ecran() {
                     i = lengthPiece(tokenModels[num - 1][0]) + 1;
                 }
             }
-            if (gameOver) {
-                alert(gameOver);
-            }
         }
     };
 
@@ -282,10 +275,38 @@ function Ecran() {
                 }
             }
             if (!skipLine) {
-                alert("ligne détruite");
+                lineToDelete.push(i);
             }
         }
+        return destroyLine(lineToDelete);
     };
+
+    const destroyLine = (lineToDelete) => {
+        let newGrid = JSON.parse(JSON.stringify(grid));
+        for (let i = 0; i < lineToDelete.length; i++) {
+            for (let j = 0; j < TETRIS.GRID.col; j++) {
+                newGrid[lineToDelete[i]][j] = 0;
+            }
+            newGrid = descent(newGrid, lineToDelete[i]);
+        }
+        return newGrid;
+    };
+
+    const descent = (gridCopy, start) => {
+        console.log(start);
+        let newGrid = JSON.parse(JSON.stringify(gridCopy));
+        for (let i = 1; i <= start; i++) {
+            for (let j = 0; j < TETRIS.GRID.col; j++) {
+                gridCopy[i][j] = newGrid[i - 1][j];
+            }
+        }
+        for (let j = 0; j < TETRIS.GRID.col; j++) {
+            gridCopy[0][j] = 0;
+        }
+        console.log(gridCopy);
+        return gridCopy;
+    };
+
     const lengthPiece = (piece) => {
         let count = 0;
         for (let i = 0; i < piece.length; i++) {

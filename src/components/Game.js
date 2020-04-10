@@ -14,11 +14,7 @@ function Ecran() {
     for (let i = 0; i < TETRIS.GRID.row; i++) {
         tabInter[i] = new Array(TETRIS.GRID.col);
         for (let j = 0; j < TETRIS.GRID.col; j++) {
-            if ((j === 0 || j === 9) && (i <= 5 || i >= 15)) {
-                tabInter[i][j] = 4;
-            } else {
-                tabInter[i][j] = 0;
-            }
+            tabInter[i][j] = 0;
         }
     }
     const [grid, setGrid] = useState(tabInter);
@@ -63,7 +59,6 @@ function Ecran() {
                 //bouton gauche
                 case 37:
                     setRotation(true);
-
                     if (valid(token.piece, ereaseToken(), -1, 0)) {
                         move(-1);
                     }
@@ -91,19 +86,16 @@ function Ecran() {
         }
     };
 
-    const valid = (piece, gridCopy, offsetX = 0, offsetY = 0) => {
+    const valid = (piece, gridCopy, offsetX = 0, offsetY = 0, x = coord.x, y = coord.y) => {
         for (let i = 0; i < piece.length; i++) {
             for (let j = 0; j < piece[i].length; j++) {
                 if (piece[i][j] === 1) {
-                    if (
-                        coord.y + i - 1 + offsetY > 19 ||
-                        coord.y + i - 1 + offsetY < 0 ||
-                        coord.x + j + offsetX > 9 ||
-                        coord.x + j + offsetX < 0
-                    ) {
+                    if (y + i - 1 + offsetY > 19 || x + j + offsetX > 9 || x + j + offsetX < 0) {
                         return false;
-                    } else if (gridCopy[coord.y + i - 1 + offsetY][coord.x + j + offsetX] !== 0) {
-                        return false;
+                    } else if (y + i - 1 + offsetY >= 0) {
+                        if (gridCopy[y + i - 1 + offsetY][x + j + offsetX] !== 0) {
+                            return false;
+                        }
                     }
                 }
             }
@@ -114,7 +106,7 @@ function Ecran() {
     const move = (offsetX) => {
         const { x, y } = coord;
         let tetrisGrid = ereaseToken();
-        setNextPiece(newCheckPiece(token.piece, tetrisGrid, offsetX, -1));
+        setNextPiece(checkPiece(token.piece, tetrisGrid, offsetX, -1));
         tetrisGrid = place(x + offsetX, y - 1, tetrisGrid, token.piece, token.num);
         setGrid(tetrisGrid);
         setCoord({ y: y, x: x + offsetX });
@@ -159,7 +151,7 @@ function Ecran() {
     const placeRotationPiece = (rotate, gridCopy, offSetx = 0, offsetY = 0) => {
         const { x, y } = coord;
         const { num } = token;
-        setNextPiece(newCheckPiece(tokenModels[num - 1][rotate], gridCopy, offSetx, offsetY - 1));
+        setNextPiece(checkPiece(tokenModels[num - 1][rotate], gridCopy, offSetx, offsetY - 1));
         let newGrid = place(
             x + offSetx,
             y - 1 + offsetY,
@@ -204,8 +196,7 @@ function Ecran() {
         return grid;
     };
 
-    const newCheckPiece = (piece, gridCopy, offSetx = 0, offsetY = 0) => {
-        const { y, x } = coord;
+    const checkPiece = (piece, gridCopy, offSetx = 0, offsetY = 0, x = coord.x, y = coord.y) => {
         for (let i = 0; i < piece.length; i++) {
             for (let j = 0; j < piece[i].length; j++) {
                 if (piece[i][j] === 1 && y + i + 1 + offsetY <= 19) {
@@ -224,33 +215,89 @@ function Ecran() {
         if (!nextPiece) {
             setRotation(true);
             let tetrisGrid = ereaseToken();
-            setNextPiece(newCheckPiece(token.piece, tetrisGrid));
+            if (checkPiece(token.piece, tetrisGrid)) {
+                setSpeed(false);
+            }
+            setNextPiece(checkPiece(token.piece, tetrisGrid));
             tetrisGrid = place(coord.x, coord.y, tetrisGrid, token.piece, token.num);
             setGrid(tetrisGrid);
             setCoord({ y: coord.y + 1, x: coord.x });
             setRotation(false);
         } else {
             newRandomPiece();
-            setNextPiece(false);
         }
     };
 
     const newRandomPiece = () => {
+        checkLigne();
         let { x, y } = coord;
         y = 0;
-        const num = Math.floor(1 + Math.random() * 7);
+        const num = 1;
+        //const num = Math.floor(1 + Math.random() * 7);
         x = Math.floor(TETRIS.GRID.col / 2 - tokenModels[num - 1][0].length / 2);
         let tetrisGrid = JSON.parse(JSON.stringify(grid));
-        tetrisGrid = place(x, y, tetrisGrid, tokenModels[num - 1][0], num);
-        setGrid(tetrisGrid);
-        setToken({
-            num: num,
-            piece: JSON.parse(JSON.stringify(tokenModels[num - 1][0])),
-            rotate: 0,
-        });
-        setCoord({ x: x, y: y + 1 });
+        if (valid(tokenModels[num - 1][0], grid, 0, 1, x, y)) {
+            setNextPiece(checkPiece(tokenModels[num - 1][0], grid, 0, 0, x, y));
+            tetrisGrid = place(x, y, tetrisGrid, tokenModels[num - 1][0], num);
+            setGrid(tetrisGrid);
+            setToken({
+                num: num,
+                piece: JSON.parse(JSON.stringify(tokenModels[num - 1][0])),
+                rotate: 0,
+            });
+            setCoord({ x: x, y: y + 1 });
+        } else {
+            let gameOver = true;
+            for (let i = 1; i < lengthPiece(tokenModels[num - 1][0]); i++) {
+                y -= 1;
+                if (valid(tokenModels[num - 1][0], grid, 0, 1, x, y)) {
+                    setNextPiece(checkPiece(tokenModels[num - 1][0], grid, 0, 0, x, y));
+                    tetrisGrid = place(x, y, tetrisGrid, tokenModels[num - 1][0], num);
+                    setGrid(tetrisGrid);
+                    setToken({
+                        num: num,
+                        piece: JSON.parse(JSON.stringify(tokenModels[num - 1][0])),
+                        rotate: 0,
+                    });
+                    setCoord({ x: x, y: y + 1 });
+                    gameOver = false;
+                    i = lengthPiece(tokenModels[num - 1][0]) + 1;
+                }
+            }
+            if (gameOver) {
+                alert(gameOver);
+            }
+        }
     };
 
+    const checkLigne = () => {
+        const lineToDelete = [];
+        let skipLine = false;
+        for (let i = 0; i < TETRIS.GRID.row; i++) {
+            skipLine = false;
+            for (let j = 0; j < TETRIS.GRID.col; j++) {
+                if (grid[i][j] === 0) {
+                    skipLine = true;
+                    j = TETRIS.GRID.col;
+                }
+            }
+            if (!skipLine) {
+                alert("ligne détruite");
+            }
+        }
+    };
+    const lengthPiece = (piece) => {
+        let count = 0;
+        for (let i = 0; i < piece.length; i++) {
+            for (let j = 0; j < piece[i].length; j++) {
+                if (piece[i][j] === 1) {
+                    count++;
+                    j = piece[i].length;
+                }
+            }
+        }
+        return count;
+    };
     const play = () => {
         setPlaying(true);
         newRandomPiece();

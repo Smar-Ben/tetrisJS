@@ -30,7 +30,7 @@ function drawTable(canvasRef) {
         );
         ctx.stroke();
     }
-    for (let i = 0; i < TETRIS.GRID.row + 1; i++) {
+    for (let i = 0; i < TETRIS.GRID.col + 1; i++) {
         ctx.strokeStyle = "white";
         ctx.lineWidth = 2;
         ctx.moveTo(

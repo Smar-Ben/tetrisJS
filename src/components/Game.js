@@ -1,11 +1,12 @@
 import React, { useEffect, useRef, Fragment, useState } from "react";
 import "../css/App.css";
-import playButton from "../asset/play-button.png";
+import Menu from "./Menu";
 import Board from "./Board";
 import useInterval from "../hooks/useInteval";
 import useEvent from "../hooks/useEvent";
 import { CANVAS, TETRIS, tokenModels } from "../asset/variable";
-
+import { faPause, faPlay } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 export const color = ["red", "cyan", "green", "yellow", "magenta", "orange", "pink"];
 
 function Ecran() {
@@ -25,6 +26,7 @@ function Ecran() {
     //const [isFalling, setFalling] = useState(false);
     const [speed, setSpeed] = useState(false);
     const [hasRotated, setRotation] = useState(false);
+    const [isPaused, setPaused] = useState(false);
     const level = 1;
 
     useEffect(() => {
@@ -229,8 +231,7 @@ function Ecran() {
         let { x, y } = coord;
         y = 0;
         setSpeed(false);
-        const num = 6;
-        //const num = Math.floor(1 + Math.random() * 7);
+        const num = Math.floor(1 + Math.random() * 7);
         x = Math.floor(TETRIS.GRID.col / 2 - tokenModels[num - 1][0].length / 2);
         let tetrisGrid = checkLigne();
         if (valid(tokenModels[num - 1][0], grid, 0, 1, x, y)) {
@@ -330,7 +331,7 @@ function Ecran() {
         () => {
             falling();
         },
-        isPlaying ? (speed ? 25 : 1000 / level) : null
+        isPlaying ? (isPaused ? null : speed ? 25 : 1000 / level) : null
     );
     return (
         <Fragment>
@@ -341,15 +342,20 @@ function Ecran() {
                 height={CANVAS.height}
                 className="brick"
             />
-            {!isPlaying && (
-                <img
-                    className="center"
-                    src={playButton}
-                    alt="fds"
+            {!isPlaying && <Menu play={play}></Menu>}
+            {isPlaying && (
+                <button
+                    className="pause"
                     onClick={() => {
-                        play();
+                        setPaused(!isPaused);
                     }}
-                ></img>
+                >
+                    {isPaused ? (
+                        <FontAwesomeIcon icon={faPlay} size="2x" style={{ color: "grey" }} />
+                    ) : (
+                        <FontAwesomeIcon icon={faPause} size="2x" style={{ color: "grey" }} />
+                    )}
+                </button>
             )}
         </Fragment>
     );

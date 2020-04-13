@@ -2,13 +2,13 @@ import React, { useEffect, useRef, Fragment, useState } from "react";
 import "../css/App.css";
 import Menu from "./Menu";
 import Board from "./Board";
+import PauseScreen from "./PauseScreen";
 import useInterval from "../hooks/useInteval";
 import useEvent from "../hooks/useEvent";
-import { CANVAS, TETRIS, tokenModels } from "../asset/variable";
+import { CANVAS, TETRIS, tokenModels, color } from "../asset/variable";
 import { faPause, faPlay } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-export const color = ["red", "cyan", "green", "yellow", "magenta", "orange", "pink"];
-
+import Score from "./Score";
 function Ecran() {
     const brickCanvas = useRef(null);
     let tabInter = new Array(TETRIS.GRID.row);
@@ -23,10 +23,12 @@ function Ecran() {
     const [isPlaying, setPlaying] = useState(false);
     const [token, setToken] = useState({ num: -1, piece: null, rotate: -1 });
     const [nextPiece, setNextPiece] = useState(false);
-    //const [isFalling, setFalling] = useState(false);
     const [speed, setSpeed] = useState(false);
     const [hasRotated, setRotation] = useState(false);
     const [isPaused, setPaused] = useState(false);
+    const [isGameOver, setGameOver] = useState(false);
+    const [score, setScore] = useState(0);
+    const [nextToken, setNextoken] = useState(-1);
     const level = 1;
 
     useEffect(() => {
@@ -231,7 +233,13 @@ function Ecran() {
         let { x, y } = coord;
         y = 0;
         setSpeed(false);
-        const num = Math.floor(1 + Math.random() * 7);
+        let num;
+        let nextNum = Math.floor(1 + Math.random() * 7);
+        if (token.num === -1) {
+            num = Math.floor(1 + Math.random() * 7);
+        } else {
+            num = nextToken;
+        }
         x = Math.floor(TETRIS.GRID.col / 2 - tokenModels[num - 1][0].length / 2);
         let tetrisGrid = checkLigne();
         if (valid(tokenModels[num - 1][0], grid, 0, 1, x, y)) {
@@ -251,6 +259,7 @@ function Ecran() {
                 setGrid(tabInter);
             }
         }
+        setNextoken(nextNum);
     };
 
     const placeNewPiece = (x, y, num, tetrisGrid) => {
@@ -280,6 +289,7 @@ function Ecran() {
                 lineToDelete.push(i);
             }
         }
+        setScore(score + 100 * lineToDelete.length);
         return destroyLine(lineToDelete);
     };
 
@@ -295,7 +305,6 @@ function Ecran() {
     };
 
     const descent = (gridCopy, start) => {
-        console.log(start);
         let newGrid = JSON.parse(JSON.stringify(gridCopy));
         for (let i = 1; i <= start; i++) {
             for (let j = 0; j < TETRIS.GRID.col; j++) {
@@ -305,7 +314,6 @@ function Ecran() {
         for (let j = 0; j < TETRIS.GRID.col; j++) {
             gridCopy[0][j] = 0;
         }
-        console.log(gridCopy);
         return gridCopy;
     };
 
@@ -327,6 +335,38 @@ function Ecran() {
         newRandomPiece();
     };
 
+    const handlePause = () => {
+        setPaused(!isPaused);
+    };
+
+    const quit = () => {
+        setPlaying(false);
+        setPaused(false);
+        let tabZero = new Array(TETRIS.GRID.row);
+        for (let i = 0; i < TETRIS.GRID.row; i++) {
+            tabZero[i] = new Array(TETRIS.GRID.col);
+            for (let j = 0; j < TETRIS.GRID.col; j++) {
+                tabZero[i][j] = 0;
+            }
+        }
+        setGrid(tabZero);
+    };
+
+    const restart = () => {
+        let tabZero = new Array(TETRIS.GRID.row);
+        for (let i = 0; i < TETRIS.GRID.row; i++) {
+            tabZero[i] = new Array(TETRIS.GRID.col);
+            for (let j = 0; j < TETRIS.GRID.col; j++) {
+                tabZero[i][j] = 0;
+            }
+        }
+        setGrid(tabZero);
+        setToken({ num: -1, piece: null, rotate: -1 });
+        setNextPiece(false);
+        setSpeed(false);
+        setRotation(false);
+    };
+
     useInterval(
         () => {
             falling();
@@ -344,12 +384,7 @@ function Ecran() {
             />
             {!isPlaying && <Menu play={play}></Menu>}
             {isPlaying && (
-                <button
-                    className="pause"
-                    onClick={() => {
-                        setPaused(!isPaused);
-                    }}
-                >
+                <button className="pauseButton" onClick={handlePause}>
                     {isPaused ? (
                         <FontAwesomeIcon icon={faPlay} size="2x" style={{ color: "grey" }} />
                     ) : (
@@ -357,6 +392,8 @@ function Ecran() {
                     )}
                 </button>
             )}
+            {isPaused && <PauseScreen pause={handlePause} restart={restart} quit={quit} />}
+            {isPlaying && <Score score={score} piece={nextToken}></Score>}
         </Fragment>
     );
 }

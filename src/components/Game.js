@@ -333,6 +333,7 @@ function Ecran() {
     const play = () => {
         setPlaying(true);
         newRandomPiece();
+        setScore(0);
     };
 
     const handlePause = () => {

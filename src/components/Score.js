@@ -11,10 +11,10 @@ const coordNextPiece = {
     x: (TETRIS.COORD.x - showNextToken.width) / 2,
     y: 50,
 };
-const boxSize = { width: 175, height: 95 };
+const boxSize = { width: 175, height: 135 };
 const boxCoord = {
     x: (TETRIS.COORD.x - boxSize.width - border.width) / 2,
-    y: 420,
+    y: 370,
 };
 /* const scoreCoord = {
     x: 
@@ -108,13 +108,12 @@ function drawScoreTxt(canvasRef) {
     const sizeTxt = ctx.measureText(txt);
     const xText = boxCoord.x + (boxSize.width - sizeTxt.width) / 2;
     ctx.fillText(txt, xText, boxCoord.y + offsetTexty);
-    console.log(sizeTxt);
     ctx.fillStyle = "crimson";
     const size = 5;
     ctx.fillRect(boxCoord.x, boxCoord.y + offsetTexty + 15, boxSize.width, size);
 }
 
-function drawScore(canvasRef, score) {
+function drawScore(canvasRef, score, level) {
     const ctx = canvasRef.current.getContext("2d");
     const scoreTxt = score.toString();
     ctx.font = "28px  -apple-system ";
@@ -131,6 +130,22 @@ function drawScore(canvasRef, score) {
     ctx.fillStyle = "white";
     const scoreX = boxCoord.x + (boxSize.width - sizeScore.width) / 2;
     ctx.fillText(scoreTxt, scoreX, boxCoord.y + offsetScoreY + sizeFont);
+    ctx.fillStyle = "crimson";
+    ctx.fillRect(boxCoord.x, boxCoord.y + offsetScoreY + sizeFont + 8, boxSize.width, 5);
+    ctx.font = "20px  -apple-system ";
+    //const levelTxt = level.toString();
+    ctx.fillStyle = "white";
+
+    const levelTxt = "LEVEL " + level.toString();
+    const levelSize = ctx.measureText(levelTxt);
+    const levelX = boxCoord.x + (boxSize.width - levelSize.width) / 2;
+    ctx.fillText(levelTxt, levelX, boxCoord.y + offsetScoreY + 2 * sizeFont + 8);
+    //console.log(level);
+    /*     const numLevelTxt = level.toString();
+    const numLevelSize = ctx.measureText(numLevelTxt);
+    console.log(numLevelSize);
+    const numLevelX = levelX + levelSize.width + 20;
+    ctx.fillText(numLevelTxt, numLevelX, boxCoord.y + offsetScoreY + 2 * sizeFont); */
 }
 function Ecran(props) {
     const canvasRef = useRef(null);
@@ -138,14 +153,14 @@ function Ecran(props) {
     useEffect(() => {
         drawTable(canvasRef);
         drawScoreTxt(canvasRef);
-        drawScore(canvasRef, props.score);
+        drawScore(canvasRef, props.score, props.level);
     }, []);
     useEffect(() => {
         drawPiece(canvasRef, props.piece);
     }, [props.piece]);
     useEffect(() => {
-        drawScore(canvasRef, props.score);
-    }, [props.score]);
+        drawScore(canvasRef, props.score, props.level);
+    }, [props.score, props.level]);
     return (
         <Fragment>
             <canvas ref={canvasRef} width={CANVAS.width} height={CANVAS.height} className="brick" />

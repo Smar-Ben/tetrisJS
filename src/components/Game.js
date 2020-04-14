@@ -29,7 +29,7 @@ function Ecran() {
     const [isGameOver, setGameOver] = useState(false);
     const [score, setScore] = useState(0);
     const [nextToken, setNextoken] = useState(-1);
-    const level = 1;
+    const [level, setLevel] = useState(1);
 
     useEffect(() => {
         const ctx = brickCanvas.current.getContext("2d");
@@ -289,7 +289,11 @@ function Ecran() {
                 lineToDelete.push(i);
             }
         }
-        setScore(score + 100 * lineToDelete.length);
+        if (lineToDelete.length > 0) {
+            const newScore = score + 100 * lineToDelete.length;
+            setScore(newScore);
+            setLevel(Math.floor(newScore / 1000 + 1));
+        }
         return destroyLine(lineToDelete);
     };
 
@@ -394,7 +398,7 @@ function Ecran() {
                 </button>
             )}
             {isPaused && <PauseScreen pause={handlePause} restart={restart} quit={quit} />}
-            {isPlaying && <Score score={score} piece={nextToken}></Score>}
+            {isPlaying && <Score score={score} piece={nextToken} level={level}></Score>}
         </Fragment>
     );
 }

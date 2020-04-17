@@ -9,6 +9,8 @@ import { CANVAS, TETRIS, tokenModels, color } from "../asset/variable";
 import { faPause, faPlay } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Score from "./Score";
+import GameOverScreen from "./GameOver";
+
 function Ecran() {
     const brickCanvas = useRef(null);
     let tabInter = new Array(TETRIS.GRID.row);
@@ -56,6 +58,21 @@ function Ecran() {
             }
         }
     }, [grid]);
+
+    useEffect(() => {
+        //localStorage.clear();
+        const score = JSON.parse(window.localStorage.getItem("score"));
+        console.log(score);
+        if (!score) {
+            let baseScore = [];
+            const name = ["GOD", "SMAR", "NEAS", "BEN", "NEB"];
+            const score = [10000, 7500, 3000, 0, 0];
+            for (let i = 0; i < 5; i++) {
+                baseScore.push({ name: name[i], score: score[i] });
+            }
+            window.localStorage.setItem("score", JSON.stringify(baseScore));
+        }
+    }, []);
 
     const handler = (event) => {
         if (isPlaying) {
@@ -255,8 +272,9 @@ function Ecran() {
                 }
             }
             if (gameOver) {
-                setPlaying(false);
-                setGrid(tabInter);
+                //setPlaying(false);
+                //setGrid(tabInter);
+                setGameOver(true);
             }
         }
         setNextoken(nextNum);
@@ -347,6 +365,7 @@ function Ecran() {
     const quit = () => {
         setPlaying(false);
         setPaused(false);
+        setGameOver(false);
         let tabZero = new Array(TETRIS.GRID.row);
         for (let i = 0; i < TETRIS.GRID.row; i++) {
             tabZero[i] = new Array(TETRIS.GRID.col);
@@ -372,12 +391,21 @@ function Ecran() {
         setRotation(false);
     };
 
-    useInterval(
-        () => {
-            falling();
-        },
-        isPlaying ? (isPaused ? null : speed ? 25 : 1000 / level) : null
-    );
+    const interval = () => {
+        if (isPlaying) {
+            if (isPaused || isGameOver) {
+                return null;
+            } else if (speed) {
+                return 25;
+            } else {
+                return 1000 / level;
+            }
+        }
+        return null;
+    };
+    useInterval(() => {
+        falling();
+    }, interval());
     return (
         <Fragment>
             <Board></Board>
@@ -399,6 +427,7 @@ function Ecran() {
             )}
             {isPaused && <PauseScreen pause={handlePause} restart={restart} quit={quit} />}
             {isPlaying && <Score score={score} piece={nextToken} level={level}></Score>}
+            {isGameOver && <GameOverScreen score={score} quit={quit} />}
         </Fragment>
     );
 }

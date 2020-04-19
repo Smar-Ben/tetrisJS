@@ -111,12 +111,20 @@ function Ecran() {
     }, [grid]);
 
     useEffect(() => {
+        if (isGameOver) {
+            if (music) {
+                music.pause();
+            }
+        }
+    }, [isGameOver]);
+
+    useEffect(() => {
         //localStorage.clear();
         const score = JSON.parse(window.localStorage.getItem("score"));
         if (!score) {
             let baseScore = [];
             const name = ["GOD", "SMAR", "NEAS", "BEN", "NEB"];
-            const score = [10000, 7500, 3000, 0, 0];
+            const score = [10000, 7500, 5000, 3000, 1500];
             for (let i = 0; i < 5; i++) {
                 baseScore.push({ name: name[i], score: score[i] });
             }
@@ -125,7 +133,6 @@ function Ecran() {
     }, []);
 
     const handler = (event) => {
-        console.log(isPaused);
         if (isPlaying && !isPaused && !isGameOver) {
             switch (event.keyCode) {
                 //bouton gauche
@@ -244,6 +251,14 @@ function Ecran() {
         return tetrisGrid;
     };
 
+    const handlerVisibility = (event) => {
+        if (event.target.visibilityState === "hidden") {
+            if (isPlaying) {
+                handlePause();
+            }
+        }
+    };
+
     const handlerUp = (event) => {
         if (event.keyCode === 40 && speed === true) {
             setSpeed(false);
@@ -254,6 +269,7 @@ function Ecran() {
     };
     useEvent("keydown", handler);
     useEvent("keyup", handlerUp);
+    useEvent("visibilitychange", handlerVisibility);
 
     const place = (x, y, grid, piece, num) => {
         for (let j = y; j < y + piece.length; j++) {
@@ -332,7 +348,7 @@ function Ecran() {
             //console.log(numberZero(tokenModels[num - 1][0]));
             const offsetY = numberZero(tokenModels[num - 1][0]);
             const rowPiece = lengthPiece(tokenModels[num - 1][0]);
-            for (let i = 1; i < rowPiece + offsetY; i++) {
+            for (let i = 1; y + (rowPiece + offsetY - 1) > 0; i++) {
                 y -= 1;
                 if (valid(tokenModels[num - 1][0], grid, 0, 1, x, y)) {
                     placeNewPiece(x, y, num, tetrisGrid);

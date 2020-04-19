@@ -49,7 +49,10 @@ function GameOver(props) {
         }
     };
     const handleQuit = () => {
-        if (name.length >= 2) {
+        console.log(isOnHighscore);
+        if (isOnHighscore === -1) {
+            props.quit();
+        } else if (name.length >= 2) {
             props.quit();
             localStorage.setItem("score", JSON.stringify(highScore));
         } else {

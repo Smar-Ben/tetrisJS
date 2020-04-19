@@ -6,7 +6,6 @@ function HighScore(props) {
     const handleChange = (e) => {
         props.changeParent(e);
     };
-    //console.log(props);
     useEffect(() => {
         if (refInput.current) {
             refInput.current.focus();

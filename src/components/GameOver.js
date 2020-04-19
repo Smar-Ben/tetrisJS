@@ -1,13 +1,18 @@
 import React, { Fragment, useState, useEffect } from "react";
 import "../css/App.css";
 import HighScore from "./HighScore";
-
+let didOnce = false;
 function GameOver(props) {
     const [name, setName] = useState("");
     const [isOnHighscore, setOnHighscore] = useState(-1);
     const [highScore, setHighScore] = useState(JSON.parse(localStorage.getItem("score")));
-
     useEffect(() => {
+        didOnce = true;
+        return () => {
+            didOnce = false;
+        };
+    }, []);
+    const checkIsOnHighScore = () => {
         const { score } = props;
         let newIndex = -1;
         let highScoreCopy = JSON.parse(JSON.stringify(highScore));
@@ -15,7 +20,6 @@ function GameOver(props) {
             if (score >= highScoreCopy[i].score) {
                 setOnHighscore(i);
                 newIndex = i;
-                console.log(highScoreCopy[i].name);
                 break;
             }
         }
@@ -30,8 +34,11 @@ function GameOver(props) {
             highScoreCopy[newIndex] = { name: name, score: score };
             setHighScore(highScoreCopy);
         }
-        //localStorage.setItem("score", JSON.stringify(highScore));
-    }, []);
+    };
+    if (!didOnce) {
+        didOnce = true;
+        checkIsOnHighScore();
+    }
 
     const changeText = (e) => {
         if (isOnHighscore >= 0) {

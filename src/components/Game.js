@@ -6,11 +6,14 @@ import PauseScreen from "./PauseScreen";
 import useInterval from "../hooks/useInteval";
 import useEvent from "../hooks/useEvent";
 import { CANVAS, TETRIS, tokenModels, color } from "../asset/variable";
-import { faPause, faPlay } from "@fortawesome/free-solid-svg-icons";
+import { faPause, faPlay, faVolumeMute, faVolumeUp } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Score from "./Score";
 import GameOverScreen from "./GameOver";
+import musicOriginal from "../asset/tetrisOriginal.mp3";
+import music99 from "../asset/tetris99.mp3";
 
+let music = null;
 function Ecran() {
     const brickCanvas = useRef(null);
     let tabInter = new Array(TETRIS.GRID.row);
@@ -20,19 +23,67 @@ function Ecran() {
             tabInter[i][j] = 0;
         }
     }
+    //grille de jeu
     const [grid, setGrid] = useState(tabInter);
+    //coordonnées de la piece
     const [coord, setCoord] = useState({ x: 3, y: 0 });
+    //boolean qui permet de savoir si le joueur joue
     const [isPlaying, setPlaying] = useState(false);
+    //objet qui correspond à la pièce que le joueur utilise
+    //num correspond à la couleur
+    //piece est un tableau les positions de la pièces
+    //rotate: numéro de la rotation
     const [token, setToken] = useState({ num: -1, piece: null, rotate: -1 });
+    //boolean qui est vrai quand la prochaine pièce ne peut pas tomber
     const [nextPiece, setNextPiece] = useState(false);
+    //boolean qui est vrai lorsque le joueur accelère la chute
     const [speed, setSpeed] = useState(false);
+    //boolean qui est vrai quand une piéce est en train de subir une rotation
     const [hasRotated, setRotation] = useState(false);
+    //boolean qui est vrai quand le jeu est pause
     const [isPaused, setPaused] = useState(false);
+    //boolean qui est vrai quand le joueur a un game over
     const [isGameOver, setGameOver] = useState(false);
+    //score du joueur
     const [score, setScore] = useState(0);
+    //prochaine piece du jeu
     const [nextToken, setNextoken] = useState(-1);
+    //niveau du jeu
     const [level, setLevel] = useState(1);
+    //nom de la musique en cours
+    const [audio, setAudio] = useState("");
+    //volume de la musique
+    const [volume, setVolume] = useState(0);
 
+    useEffect(() => {
+        if (audio !== "") {
+            if (audio === "moderne") {
+                music = new Audio(music99);
+            } else if (audio === "original") {
+                music = new Audio(musicOriginal);
+            }
+            if (music) {
+                music.play();
+                music.loop = true;
+            }
+        } else {
+            if (music) {
+                music.pause();
+            }
+        }
+        return () => {
+            if (music) {
+                music.pause();
+                music = null;
+            }
+        };
+    }, [audio]);
+
+    useEffect(() => {
+        if (music) {
+            music.volume = (volume * 5) / 100;
+        }
+    }, [volume]);
     useEffect(() => {
         const ctx = brickCanvas.current.getContext("2d");
         //création des canvas
@@ -62,7 +113,6 @@ function Ecran() {
     useEffect(() => {
         //localStorage.clear();
         const score = JSON.parse(window.localStorage.getItem("score"));
-        console.log(score);
         if (!score) {
             let baseScore = [];
             const name = ["GOD", "SMAR", "NEAS", "BEN", "NEB"];
@@ -75,7 +125,8 @@ function Ecran() {
     }, []);
 
     const handler = (event) => {
-        if (isPlaying) {
+        console.log(isPaused);
+        if (isPlaying && !isPaused && !isGameOver) {
             switch (event.keyCode) {
                 //bouton gauche
                 case 37:
@@ -246,24 +297,42 @@ function Ecran() {
         }
     };
 
-    const newRandomPiece = () => {
+    const newRandomPiece = (begin = false) => {
         let { x, y } = coord;
         y = 0;
         setSpeed(false);
         let num;
         let nextNum = Math.floor(1 + Math.random() * 7);
-        if (token.num === -1) {
+        if (token.num === -1 || begin) {
             num = Math.floor(1 + Math.random() * 7);
         } else {
             num = nextToken;
         }
         x = Math.floor(TETRIS.GRID.col / 2 - tokenModels[num - 1][0].length / 2);
-        let tetrisGrid = checkLigne();
-        if (valid(tokenModels[num - 1][0], grid, 0, 1, x, y)) {
+        let tetrisGrid;
+        if (begin) {
+            let tabZero = new Array(TETRIS.GRID.row);
+            for (let i = 0; i < TETRIS.GRID.row; i++) {
+                tabZero[i] = new Array(TETRIS.GRID.col);
+                for (let j = 0; j < TETRIS.GRID.col; j++) {
+                    tabZero[i][j] = 0;
+                }
+            }
+            tetrisGrid = JSON.parse(JSON.stringify(tabZero));
+        } else {
+            tetrisGrid = checkLigne();
+        }
+        if (begin) {
+            placeNewPiece(x, y, num, tetrisGrid);
+        } else if (valid(tokenModels[num - 1][0], grid, 0, 1, x, y)) {
             placeNewPiece(x, y, num, tetrisGrid);
         } else {
             let gameOver = true;
-            for (let i = 1; i < lengthPiece(tokenModels[num - 1][0]); i++) {
+            // let length =
+            //console.log(numberZero(tokenModels[num - 1][0]));
+            const offsetY = numberZero(tokenModels[num - 1][0]);
+            const rowPiece = lengthPiece(tokenModels[num - 1][0]);
+            for (let i = 1; i < rowPiece + offsetY; i++) {
                 y -= 1;
                 if (valid(tokenModels[num - 1][0], grid, 0, 1, x, y)) {
                     placeNewPiece(x, y, num, tetrisGrid);
@@ -272,8 +341,6 @@ function Ecran() {
                 }
             }
             if (gameOver) {
-                //setPlaying(false);
-                //setGrid(tabInter);
                 setGameOver(true);
             }
         }
@@ -281,7 +348,7 @@ function Ecran() {
     };
 
     const placeNewPiece = (x, y, num, tetrisGrid) => {
-        setNextPiece(checkPiece(tokenModels[num - 1][0], grid, 0, 0, x, y));
+        setNextPiece(checkPiece(tokenModels[num - 1][0], tetrisGrid, 0, 0, x, y));
         tetrisGrid = place(x, y, tetrisGrid, tokenModels[num - 1][0], num);
         setGrid(tetrisGrid);
         setToken({
@@ -339,6 +406,18 @@ function Ecran() {
         return gridCopy;
     };
 
+    const numberZero = (piece) => {
+        let count = 0;
+        for (let i = 0; i < piece.length; i++) {
+            for (let j = 0; j < piece[i].length; j++) {
+                if (piece[i][j] === 1) {
+                    return count;
+                }
+            }
+            count++;
+        }
+        return count;
+    };
     const lengthPiece = (piece) => {
         let count = 0;
         for (let i = 0; i < piece.length; i++) {
@@ -352,14 +431,23 @@ function Ecran() {
         return count;
     };
 
-    const play = () => {
+    const play = (volume, music) => {
+        setVolume(volume);
+        setAudio(music);
         setPlaying(true);
-        newRandomPiece();
+        newRandomPiece(true);
         setScore(0);
     };
 
     const handlePause = () => {
         setPaused(!isPaused);
+        if (music) {
+            if (!isPaused) {
+                music.pause();
+            } else {
+                music.play();
+            }
+        }
     };
 
     const quit = () => {
@@ -374,21 +462,26 @@ function Ecran() {
             }
         }
         setGrid(tabZero);
+        setAudio("");
+        setVolume(100);
+        if (music) {
+            music.pause();
+            music = null;
+        }
     };
 
     const restart = () => {
-        let tabZero = new Array(TETRIS.GRID.row);
-        for (let i = 0; i < TETRIS.GRID.row; i++) {
-            tabZero[i] = new Array(TETRIS.GRID.col);
-            for (let j = 0; j < TETRIS.GRID.col; j++) {
-                tabZero[i][j] = 0;
-            }
-        }
-        setGrid(tabZero);
-        setToken({ num: -1, piece: null, rotate: -1 });
-        setNextPiece(false);
+        //setGrid(tabZero);
+        //setToken({ num: -1, piece: null, rotate: -1 });
         setSpeed(false);
         setRotation(false);
+        if (music) {
+            music.currentTime = 0;
+            music.play();
+        }
+        newRandomPiece(true);
+        setScore(0);
+        setPlaying(true);
     };
 
     const interval = () => {
@@ -418,11 +511,39 @@ function Ecran() {
             {!isPlaying && <Menu play={play}></Menu>}
             {isPlaying && (
                 <button className="pauseButton" onClick={handlePause}>
-                    {isPaused ? (
-                        <FontAwesomeIcon icon={faPlay} size="2x" style={{ color: "grey" }} />
-                    ) : (
-                        <FontAwesomeIcon icon={faPause} size="2x" style={{ color: "grey" }} />
-                    )}
+                    <FontAwesomeIcon
+                        icon={isPaused ? faPlay : faPause}
+                        size="2x"
+                        style={{ color: "grey" }}
+                    />
+                </button>
+            )}
+            {isPlaying && (
+                <button
+                    className="musicButton"
+                    onClick={() => {
+                        if (music) {
+                            if (music.paused) {
+                                music.play();
+                            } else {
+                                music.pause();
+                            }
+                        }
+                    }}
+                >
+                    <FontAwesomeIcon
+                        icon={
+                            audio !== ""
+                                ? music !== null
+                                    ? music.paused
+                                        ? faVolumeUp
+                                        : faVolumeMute
+                                    : faVolumeMute
+                                : faVolumeUp
+                        }
+                        size="2x"
+                        style={{ color: "grey" }}
+                    />
                 </button>
             )}
             {isPaused && <PauseScreen pause={handlePause} restart={restart} quit={quit} />}

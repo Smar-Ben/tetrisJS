@@ -140,12 +140,6 @@ function drawScore(canvasRef, score, level) {
     const levelSize = ctx.measureText(levelTxt);
     const levelX = boxCoord.x + (boxSize.width - levelSize.width) / 2;
     ctx.fillText(levelTxt, levelX, boxCoord.y + offsetScoreY + 2 * sizeFont + 8);
-    //console.log(level);
-    /*     const numLevelTxt = level.toString();
-    const numLevelSize = ctx.measureText(numLevelTxt);
-    console.log(numLevelSize);
-    const numLevelX = levelX + levelSize.width + 20;
-    ctx.fillText(numLevelTxt, numLevelX, boxCoord.y + offsetScoreY + 2 * sizeFont); */
 }
 function Ecran(props) {
     const canvasRef = useRef(null);
@@ -153,7 +147,6 @@ function Ecran(props) {
     useEffect(() => {
         drawTable(canvasRef);
         drawScoreTxt(canvasRef);
-        drawScore(canvasRef, props.score, props.level);
     }, []);
     useEffect(() => {
         drawPiece(canvasRef, props.piece);

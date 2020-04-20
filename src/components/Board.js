@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, Fragment } from "react";
 import { CANVAS, TETRIS } from "../asset/variable";
 
+//fonction qui permet de dessiner une table
 function drawTable(canvasRef) {
     const ctx = canvasRef.current.getContext("2d");
     //création des canvas
@@ -17,6 +18,7 @@ function drawTable(canvasRef) {
     //création des lignes de jeu
     ctx.fillStyle = "black";
     ctx.fillRect(TETRIS.COORD.x, TETRIS.COORD.y, TETRIS.GRID.width, TETRIS.GRID.height);
+    //ligne verticale
     for (let i = 0; i < TETRIS.GRID.row + 1; i++) {
         ctx.strokeStyle = "white";
         ctx.lineWidth = 2;
@@ -30,6 +32,7 @@ function drawTable(canvasRef) {
         );
         ctx.stroke();
     }
+    //ligne horizontale
     for (let i = 0; i < TETRIS.GRID.col + 1; i++) {
         ctx.strokeStyle = "white";
         ctx.lineWidth = 2;
@@ -44,7 +47,10 @@ function drawTable(canvasRef) {
         ctx.stroke();
     }
 }
+
+//component board
 function Board() {
+    //références sur les canvas
     const canvasRef = useRef(null);
     useEffect(() => {
         drawTable(canvasRef);

@@ -1,11 +1,14 @@
+//constantes qui gére la taille des canvas
 export const CANVAS = { width: 800, height: 600 };
+//constantes qui gère les paramètres du tetris
 export const TETRIS = {
     GRID: { width: 250 + 20, height: 500 + 40, col: 10, row: 20 },
     COORD: { x: 265, y: 30 },
     SQUARE: 25,
 };
+//constantes qui gère les couleurs
 export const color = ["red", "cyan", "green", "yellow", "magenta", "orange", "pink"];
-
+//tableau contenant les pièces du tetris
 export const tokenModels = [
     [
         [

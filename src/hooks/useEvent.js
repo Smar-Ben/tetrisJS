@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-
+//hooks qui permet d'utiliser les évenements javascript
 export default function useEvent(event, handler, passive = false) {
     useEffect(() => {
         // initiate the event handler

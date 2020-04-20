@@ -55,6 +55,7 @@ function Ecran() {
     //volume de la musique
     const [volume, setVolume] = useState(0);
 
+    //permet de lancer la musique ou de l'arrêter en fonction de la variable audio
     useEffect(() => {
         if (audio !== "") {
             if (audio === "moderne") {
@@ -63,6 +64,7 @@ function Ecran() {
                 music = new Audio(musicOriginal);
             }
             if (music) {
+                music.load();
                 music.play();
                 music.loop = true;
             }
@@ -79,20 +81,25 @@ function Ecran() {
         };
     }, [audio]);
 
+    //gére le volume du son
     useEffect(() => {
         if (music) {
             music.volume = (volume * 5) / 100;
         }
     }, [volume]);
+
+    //modifie le canvas qui affiche la grille du tetris à
     useEffect(() => {
         const ctx = brickCanvas.current.getContext("2d");
         //création des canvas
         if (ctx) {
+            //on efface l'ancienne grille de jeu
             ctx.clearRect(0, 0, CANVAS.width, CANVAS.height);
+            //on regarde toute les cases des grilles
             for (let i = 0; i < TETRIS.GRID.row; i++) {
                 for (let j = 0; j < TETRIS.GRID.col; j++) {
-                    if (grid[i][j] === 0) {
-                    } else {
+                    //on affiche les carrés de la grille
+                    if (grid[i][j] !== 0) {
                         ctx.fillStyle = color[grid[i][j] - 1];
                         ctx.fillRect(
                             TETRIS.COORD.x +
@@ -110,6 +117,7 @@ function Ecran() {
         }
     }, [grid]);
 
+    //lorsque le joueur subit un game over, alors la music est en pause
     useEffect(() => {
         if (isGameOver) {
             if (music) {
@@ -118,8 +126,8 @@ function Ecran() {
         }
     }, [isGameOver]);
 
+    //si le joueur fait sa première partie alors on initialise le high score dans le local storage
     useEffect(() => {
-        //localStorage.clear();
         const score = JSON.parse(window.localStorage.getItem("score"));
         if (!score) {
             let baseScore = [];
@@ -132,10 +140,13 @@ function Ecran() {
         }
     }, []);
 
+    //fonction qui est appelé à chaque entré de clavier
     const handler = (event) => {
+        //si le joueur n'est pas en pause ou en game over alors il peut déplacer la pièce sur la grille de jeu
         if (isPlaying && !isPaused && !isGameOver) {
             switch (event.keyCode) {
                 //bouton gauche
+                //déplace une pièce à gauche si cela est possible
                 case 37:
                     setRotation(true);
                     if (valid(token.piece, ereaseToken(), -1, 0)) {
@@ -144,10 +155,12 @@ function Ecran() {
                     setRotation(false);
                     break;
                 //bouton haut
+                //permet de faire tourner une pièce si c'est possibe
                 case 38:
                     rotation();
                     break;
                 //bouton de droite
+                //déplace une pièce à droite si cela est possible
                 case 39:
                     setRotation(true);
                     if (valid(token.piece, ereaseToken(), 1, 0)) {
@@ -156,6 +169,7 @@ function Ecran() {
                     setRotation(false);
                     break;
                 //bouton du bas
+                //accélère la chute d'une pièce
                 case 40:
                     setRotation(true);
                     setSpeed(true);
@@ -165,7 +179,11 @@ function Ecran() {
         }
     };
 
+    //retourne un bolean vrai si une pièce est valide dans la grille de jeu
     const valid = (piece, gridCopy, offsetX = 0, offsetY = 0, x = coord.x, y = coord.y) => {
+        //on regarde tout les case d'un pièce
+        //si une case est rempli et qu'elle est touche une autre pièce dans la grille de jeu
+        //alors on retourne faux
         for (let i = 0; i < piece.length; i++) {
             for (let j = 0; j < piece[i].length; j++) {
                 if (piece[i][j] === 1) {
@@ -182,7 +200,9 @@ function Ecran() {
         return true;
     };
 
+    //déplace une pièce en fonction d'un offsetX
     const move = (offsetX) => {
+        //on déplace la pièce en fonction de offsetX
         const { x, y } = coord;
         let tetrisGrid = ereaseToken();
         setNextPiece(checkPiece(token.piece, tetrisGrid, offsetX, -1));
@@ -191,18 +211,24 @@ function Ecran() {
         setCoord({ y: y, x: x + offsetX });
     };
 
+    //permet de faire tourner une pièce
     const rotation = () => {
         if (!hasRotated) {
+            //on regarde la prochaine pièce
             let { num, rotate } = token;
             if (tokenModels[num - 1].length === rotate + 1) {
                 rotate = 0;
             } else {
                 rotate += 1;
             }
+            //on efface la pièce actuelle
             let tetrisGrid = ereaseToken();
+            //On regarde si il est possible de placer la pièce retourné
             if (valid(tokenModels[num - 1][rotate], tetrisGrid)) {
                 placeRotationPiece(rotate, tetrisGrid);
-            } else {
+            }
+            //sinon on déplace la pièce puis on l'a fait tourner
+            else {
                 let alredayRotated = false;
                 for (let i = 1; i <= 2; i++) {
                     if (valid(tokenModels[num - 1][rotate], tetrisGrid, i, 0)) {
@@ -227,9 +253,11 @@ function Ecran() {
         }
     };
 
+    //permet de placer la pièce après qu'elle est subit
     const placeRotationPiece = (rotate, gridCopy, offSetx = 0, offsetY = 0) => {
         const { x, y } = coord;
         const { num } = token;
+        //on place la pièce dans la grille de jeu
         setNextPiece(checkPiece(tokenModels[num - 1][rotate], gridCopy, offSetx, offsetY - 1));
         let newGrid = place(
             x + offSetx,
@@ -238,12 +266,12 @@ function Ecran() {
             JSON.parse(JSON.stringify(tokenModels[num - 1][rotate])),
             token.num
         );
-
         setCoord({ x: x + offSetx, y: y + offsetY });
         setToken({ num: token.num, piece: tokenModels[num - 1][rotate], rotate: rotate });
         setGrid(newGrid);
     };
 
+    //permet d'effacer la pièce qui tombe dans la grille
     const ereaseToken = () => {
         const { x, y } = coord;
         let tetrisGrid = JSON.parse(JSON.stringify(grid));
@@ -251,26 +279,40 @@ function Ecran() {
         return tetrisGrid;
     };
 
+    //fonction qui est appelé quand l'utlisateur change d'onglet sur le navigatuer
     const handlerVisibility = (event) => {
+        //si on a pas la visibilité sur la page alors met sur pause
         if (event.target.visibilityState === "hidden") {
-            if (isPlaying) {
+            if (isPlaying && !isPaused && !isGameOver) {
                 handlePause();
             }
         }
     };
 
+    //fonction qui est appelé quand on relache une touche
     const handlerUp = (event) => {
+        //l'utilisateur relache la touche du bas,
+        //alors on arrête l'accélèration de la pièce qui tombe
         if (event.keyCode === 40 && speed === true) {
             setSpeed(false);
             setRotation(false);
-        } else if (event.keyCode === 38 && hasRotated === true) {
+        }
+        //fin de la rotation
+        else if (event.keyCode === 38 && hasRotated === true) {
             setRotation(false);
         }
     };
+    //différents événement sur les entrées clavier
     useEvent("keydown", handler);
     useEvent("keyup", handlerUp);
+    //événement est appelé lorsque l'onglet n'est plus visible
     useEvent("visibilitychange", handlerVisibility);
-
+    useEvent("blur", () => {
+        if (isPlaying && !isPaused && !isGameOver) {
+            handlePause();
+        }
+    });
+    //permet de placer une piece dans la grille de jeu
     const place = (x, y, grid, piece, num) => {
         for (let j = y; j < y + piece.length; j++) {
             for (let i = x; i < x + piece[0].length; i++) {
@@ -284,6 +326,7 @@ function Ecran() {
         return grid;
     };
 
+    //regarde si la prochaine ligne est déjà rempli
     const checkPiece = (piece, gridCopy, offSetx = 0, offsetY = 0, x = coord.x, y = coord.y) => {
         for (let i = 0; i < piece.length; i++) {
             for (let j = 0; j < piece[i].length; j++) {
@@ -299,6 +342,7 @@ function Ecran() {
         return false;
     };
 
+    //fonction qui permet de simuler la chute de chaque pièce du jeu
     const falling = () => {
         if (!nextPiece) {
             setRotation(true);
@@ -313,12 +357,18 @@ function Ecran() {
         }
     };
 
+    //ajoute une nouvelle pièce qui tombe
     const newRandomPiece = (begin = false) => {
+        //coordonnées
         let { x, y } = coord;
         y = 0;
         setSpeed(false);
+        //pièce qui va tomber
         let num;
+        //prochaine pièce qui va tomber
         let nextNum = Math.floor(1 + Math.random() * 7);
+        //on regarde la prochaine pièce
+        //si elle n'existe pas alors on donne un numéro aléatoire
         if (token.num === -1 || begin) {
             num = Math.floor(1 + Math.random() * 7);
         } else {
@@ -326,6 +376,7 @@ function Ecran() {
         }
         x = Math.floor(TETRIS.GRID.col / 2 - tokenModels[num - 1][0].length / 2);
         let tetrisGrid;
+        //si begin est vrai alors on efface le tableau
         if (begin) {
             let tabZero = new Array(TETRIS.GRID.row);
             for (let i = 0; i < TETRIS.GRID.row; i++) {
@@ -335,19 +386,25 @@ function Ecran() {
                 }
             }
             tetrisGrid = JSON.parse(JSON.stringify(tabZero));
-        } else {
+        }
+        //sinon on regarde si on peut supprimer une ligne
+        else {
             tetrisGrid = checkLigne();
         }
+        //on place la nouvelle
         if (begin) {
             placeNewPiece(x, y, num, tetrisGrid);
         } else if (valid(tokenModels[num - 1][0], grid, 0, 1, x, y)) {
             placeNewPiece(x, y, num, tetrisGrid);
-        } else {
+        }
+        //si on peut pas placer de nouvelle pièce alors on regarde si il y a un game over
+        else {
             let gameOver = true;
             // let length =
             //console.log(numberZero(tokenModels[num - 1][0]));
             const offsetY = numberZero(tokenModels[num - 1][0]);
             const rowPiece = lengthPiece(tokenModels[num - 1][0]);
+            //si
             for (let i = 1; y + (rowPiece + offsetY - 1) > 0; i++) {
                 y -= 1;
                 if (valid(tokenModels[num - 1][0], grid, 0, 1, x, y)) {
@@ -363,6 +420,7 @@ function Ecran() {
         setNextoken(nextNum);
     };
 
+    //permet de placer une nouvelle piece
     const placeNewPiece = (x, y, num, tetrisGrid) => {
         setNextPiece(checkPiece(tokenModels[num - 1][0], tetrisGrid, 0, 0, x, y));
         tetrisGrid = place(x, y, tetrisGrid, tokenModels[num - 1][0], num);
@@ -375,9 +433,11 @@ function Ecran() {
         setCoord({ x: x, y: y + 1 });
     };
 
+    //regarde si il faut supprimer des lignes sur la grille de jeu
     const checkLigne = () => {
         const lineToDelete = [];
         let skipLine = false;
+        //on regarde la grille de jeu
         for (let i = 0; i < TETRIS.GRID.row; i++) {
             skipLine = false;
             for (let j = 0; j < TETRIS.GRID.col; j++) {
@@ -386,18 +446,22 @@ function Ecran() {
                     j = TETRIS.GRID.col;
                 }
             }
+            //on supprime une ligne
             if (!skipLine) {
                 lineToDelete.push(i);
             }
         }
+        //si une ligne est supprimer alors on modifie le score
         if (lineToDelete.length > 0) {
             const newScore = score + 100 * lineToDelete.length;
             setScore(newScore);
             setLevel(Math.floor(newScore / 1000 + 1));
         }
+        //On retourne la grille de jeu avec les lignes supprimés
         return destroyLine(lineToDelete);
     };
 
+    //fonction qui détruit une ligne de jeu
     const destroyLine = (lineToDelete) => {
         let newGrid = JSON.parse(JSON.stringify(grid));
         for (let i = 0; i < lineToDelete.length; i++) {
@@ -409,6 +473,7 @@ function Ecran() {
         return newGrid;
     };
 
+    //fonction qui fait tomber les blocs lors de la suppression d'une ligne
     const descent = (gridCopy, start) => {
         let newGrid = JSON.parse(JSON.stringify(gridCopy));
         for (let i = 1; i <= start; i++) {
@@ -422,6 +487,7 @@ function Ecran() {
         return gridCopy;
     };
 
+    //calcul le nombre de lignes de zéro d'un pièce
     const numberZero = (piece) => {
         let count = 0;
         for (let i = 0; i < piece.length; i++) {
@@ -434,6 +500,7 @@ function Ecran() {
         }
         return count;
     };
+    //taille en longueur de la pièce qui va tomber
     const lengthPiece = (piece) => {
         let count = 0;
         for (let i = 0; i < piece.length; i++) {
@@ -447,6 +514,7 @@ function Ecran() {
         return count;
     };
 
+    //fonction qui lance le jeu
     const play = (volume, music) => {
         setVolume(volume);
         setAudio(music);
@@ -454,7 +522,7 @@ function Ecran() {
         newRandomPiece(true);
         setScore(0);
     };
-
+    //fonction permettant de mettre le jeu en pause
     const handlePause = () => {
         setPaused(!isPaused);
         if (music) {
@@ -466,6 +534,7 @@ function Ecran() {
         }
     };
 
+    //fonction permettant de quitter le jeu
     const quit = () => {
         setPlaying(false);
         setPaused(false);
@@ -486,9 +555,8 @@ function Ecran() {
         }
     };
 
+    //permet de recommencer une partie
     const restart = () => {
-        //setGrid(tabZero);
-        //setToken({ num: -1, piece: null, rotate: -1 });
         setSpeed(false);
         setRotation(false);
         if (music) {
@@ -500,6 +568,7 @@ function Ecran() {
         setPlaying(true);
     };
 
+    //fonction défénissant le délai de l'intervalle de chute des pièce
     const interval = () => {
         if (isPlaying) {
             if (isPaused || isGameOver) {

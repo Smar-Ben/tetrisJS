@@ -1,21 +1,30 @@
 import React, { Fragment, useState, useEffect } from "react";
 import "../css/App.css";
 import HighScore from "./HighScore";
+//boolean qui permet d'éxecuter une fonction une seule fois
 let didOnce = false;
+
 function GameOver(props) {
+    //nom du nouveau gagnant
     const [name, setName] = useState("");
+    //index du prochain highscore dans le tableau des scores
     const [isOnHighscore, setOnHighscore] = useState(-1);
+    //tableau des scores
+    //les meilleurs scores sont stockés dans le local storage
     const [highScore, setHighScore] = useState(JSON.parse(localStorage.getItem("score")));
+    //boolean devient lorsqu'on monte le composant
     useEffect(() => {
         didOnce = true;
         return () => {
             didOnce = false;
         };
     }, []);
+    //on regarde si le joueur a battu le highscore
     const checkIsOnHighScore = () => {
         const { score } = props;
         let newIndex = -1;
         let highScoreCopy = JSON.parse(JSON.stringify(highScore));
+        //on regarde si le joueur a battu l'un des meilleurs scores
         for (let i = 0; i < highScoreCopy.length; i++) {
             if (score >= highScoreCopy[i].score) {
                 setOnHighscore(i);
@@ -23,6 +32,7 @@ function GameOver(props) {
                 break;
             }
         }
+        //si le joueur a battu le record alors le joueur doit saisir son nom
         if (newIndex !== -1) {
             let inter = highScoreCopy[newIndex];
             //console.log(inter);
@@ -40,6 +50,7 @@ function GameOver(props) {
         checkIsOnHighScore();
     }
 
+    //permet de changer le nom
     const changeText = (e) => {
         if (isOnHighscore >= 0) {
             setName(e.target.value);
@@ -48,14 +59,17 @@ function GameOver(props) {
             setHighScore(highScoreCopy);
         }
     };
+    //quitte l'écran des game over
     const handleQuit = () => {
         console.log(isOnHighscore);
+        //si le joueur n'a pas battu le record alors on quitte l'écran de game over
         if (isOnHighscore === -1) {
             props.quit();
         } else if (name.length >= 2) {
             props.quit();
             localStorage.setItem("score", JSON.stringify(highScore));
-        } else {
+        } //si le joueur n'a pas saisi un nom trop grand alors
+        else {
             alert("veuillez saisir un nom");
         }
     };
@@ -67,20 +81,6 @@ function GameOver(props) {
                 {isOnHighscore >= 0 && (
                     <p style={{ margin: 5, fontSize: 16, color: "red" }}>New Record</p>
                 )}
-                {/* isOnHighscore >= 0 && (
-                    <div
-                        style={{
-                            display: "flex",
-                            flexDirection: "row",
-                            justifyContent: "center",
-                            alignContent: "center",
-                            alignItems: "center",
-                        }}
-                    >
-                        <p style={{ margin: 0, fontSize: 16, marginRight: 10 }}>Name: {"  "} </p>
-                        <input type="text" size={4} value={name}></input>
-                    </div>
-                ) */}
                 <HighScore
                     score={highScore}
                     indexBorder={isOnHighscore}

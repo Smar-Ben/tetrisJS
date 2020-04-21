@@ -6,7 +6,7 @@ import PauseScreen from "./PauseScreen";
 import useInterval from "../hooks/useInteval";
 import useEvent from "../hooks/useEvent";
 import { CANVAS, TETRIS, tokenModels, color } from "../asset/variable";
-import { faPause, faPlay, faVolumeMute, faVolumeUp } from "@fortawesome/free-solid-svg-icons";
+import { faPause, faPlay } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Score from "./Score";
 import GameOverScreen from "./GameOver";
@@ -525,7 +525,7 @@ function Ecran() {
     //fonction permettant de mettre le jeu en pause
     const handlePause = () => {
         setPaused(!isPaused);
-        if (music) {
+        if (music && !isPaused) {
             if (!isPaused) {
                 music.pause();
             } else {
@@ -533,7 +533,15 @@ function Ecran() {
             }
         }
     };
-
+    //fonction permettant de changer la musique après une pause
+    const changeMusicPause = (newAudio, newVolume) => {
+        if (audio !== newAudio && newAudio !== null) {
+            setAudio(newAudio);
+            if (newVolume !== volume) {
+                setVolume(newVolume);
+            }
+        }
+    };
     //fonction permettant de quitter le jeu
     const quit = () => {
         setPlaying(false);
@@ -581,9 +589,21 @@ function Ecran() {
         }
         return null;
     };
+
+    /*  const modifyIconPause = () => {
+        if (audio !== "" || music != null) {
+            if (music.paused) {
+                return faVolumeUp;
+            }
+            return faVolumeMute;
+        } else {
+            return faVolumeUp;
+        }
+    }; */
     useInterval(() => {
         falling();
     }, interval());
+
     return (
         <Fragment>
             <Board></Board>
@@ -603,35 +623,16 @@ function Ecran() {
                     />
                 </button>
             )}
-            {isPlaying && (
-                <button
-                    className="musicButton"
-                    onClick={() => {
-                        if (music) {
-                            if (music.paused) {
-                                music.play();
-                            } else {
-                                music.pause();
-                            }
-                        }
-                    }}
-                >
-                    <FontAwesomeIcon
-                        icon={
-                            audio !== ""
-                                ? music !== null
-                                    ? music.paused
-                                        ? faVolumeUp
-                                        : faVolumeMute
-                                    : faVolumeMute
-                                : faVolumeUp
-                        }
-                        size="2x"
-                        style={{ color: "grey" }}
-                    />
-                </button>
+            {isPaused && (
+                <PauseScreen
+                    pause={handlePause}
+                    changeMusic={changeMusicPause}
+                    restart={restart}
+                    quit={quit}
+                    startAudio={audio}
+                    startVolume={volume}
+                />
             )}
-            {isPaused && <PauseScreen pause={handlePause} restart={restart} quit={quit} />}
             {isPlaying && <Score score={score} piece={nextToken} level={level}></Score>}
             {isGameOver && <GameOverScreen score={score} quit={quit} />}
         </Fragment>

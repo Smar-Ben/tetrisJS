@@ -61,7 +61,7 @@ function GameOver(props) {
     };
     //quitte l'écran des game over
     const handleQuit = () => {
-        console.log(isOnHighscore);
+        //console.log(isOnHighscore);
         //si le joueur n'a pas battu le record alors on quitte l'écran de game over
         if (isOnHighscore === -1) {
             props.quit();
@@ -96,7 +96,7 @@ function GameOver(props) {
                         margin: 0,
                     }}
                 >
-                    <button className="button2" style={{ margin: 5 }} onClick={handleQuit}>
+                    <button className="button2" onClick={handleQuit}>
                         {" "}
                         Quitter
                     </button>

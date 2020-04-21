@@ -68,9 +68,7 @@ function Ecran(props) {
                 <Fragment>
                     <div className="menu">
                         <h2 style={{ fontSize: 40 }}>OPTION</h2>
-                        <br></br>
-                        <h3>MUSIQUE</h3>
-                        <br></br>
+                        <h3 style={{ fontSize: 25 }}>MUSIQUE</h3>
                         <div
                             style={{
                                 display: "flex",
@@ -108,10 +106,9 @@ function Ecran(props) {
                             max="20"
                             value={volume}
                             onChange={changeVolume}
-                            style={{ margin: 5 }}
+                            style={{ margin: 5, fontSize: 20 }}
                         />
                         <label htmlFor="volume">Volume : {volume * 5}</label>
-                        <br></br>
                         <button
                             className="button1"
                             onClick={() => {

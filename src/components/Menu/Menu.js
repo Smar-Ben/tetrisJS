@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useState, useRef } from "react";
 import "../../css/App.css";
 import "./Menu.css";
 import useEvent from "../../hooks/useEvent";
@@ -11,7 +11,11 @@ function Ecran(props) {
     const [music, setMusic] = useState("");
     //volume de la musique
     const [volume, setVolume] = useState(20);
-
+    const refLeftInput = useRef(null);
+    const refRightInput = useRef(null);
+    const refDownInput = useRef(null);
+    const refRotateInput = useRef(null);
+    const refRetour = useRef(null);
     //GAUCHE 37 DROITE 39 BAS 40 HAUT 38
     const [control, setControl] = useState(
         new Map([
@@ -53,7 +57,38 @@ function Ecran(props) {
     const setNewInput = (e) => {
         if (isChange !== "") {
             let mapInter = new Map(control);
-            mapInter.set(isChange, { name: e.key, value: e.keyCode });
+            if (e.key === " ") {
+                mapInter.set(isChange, { name: e.code, value: e.keyCode });
+            } else {
+                mapInter.set(isChange, { name: e.key, value: e.keyCode });
+            }
+            switch (isChange) {
+                case "left":
+                    if (refLeftInput) {
+                        refLeftInput.current.blur();
+                        refRetour.current.focus();
+                    }
+                    break;
+                case "right":
+                    if (refRightInput) {
+                        refRightInput.current.blur();
+                        refRetour.current.focus();
+                    }
+                    break;
+                case "down":
+                    if (refDownInput) {
+                        refDownInput.current.blur();
+                        refRetour.current.focus();
+                    }
+                    break;
+                case "rotate":
+                    if (refRotateInput) {
+                        refRotateInput.current.blur();
+                        refRetour.current.focus();
+                    }
+                    break;
+                default:
+            }
             setControl(mapInter);
             setChange("");
             setOldName("");
@@ -65,6 +100,33 @@ function Ecran(props) {
             let mapInter = new Map(control);
             const value = mapInter.get(isChange).value;
             mapInter.set(isChange, { name: oldName, value: value });
+            switch (isChange) {
+                case "left":
+                    if (refLeftInput) {
+                        refLeftInput.current.blur();
+                        refRetour.current.focus();
+                    }
+                    break;
+                case "right":
+                    if (refRightInput) {
+                        refRightInput.current.blur();
+                        refRetour.current.focus();
+                    }
+                    break;
+                case "down":
+                    if (refDownInput) {
+                        refDownInput.current.blur();
+                        refRetour.current.focus();
+                    }
+                    break;
+                case "rotate":
+                    if (refRotateInput) {
+                        refRotateInput.current.blur();
+                        refRetour.current.focus();
+                    }
+                    break;
+                default:
+            }
             setControl(mapInter);
             setChange("");
             setOldName("");
@@ -162,6 +224,7 @@ function Ecran(props) {
                                     onClick={onSelectInput}
                                     size={6}
                                     maxLength={1}
+                                    ref={refLeftInput}
                                     readOnly
                                 />
                                 <label htmlFor="right">Droite</label>
@@ -172,6 +235,7 @@ function Ecran(props) {
                                     onClick={onSelectInput}
                                     size={6}
                                     maxLength={1}
+                                    ref={refRightInput}
                                     readOnly
                                 />
                             </div>
@@ -184,6 +248,7 @@ function Ecran(props) {
                                     onClick={onSelectInput}
                                     size={6}
                                     maxLength={1}
+                                    ref={refDownInput}
                                     readOnly
                                 />
                                 <label htmlFor="rotate">Rotation</label>
@@ -191,18 +256,21 @@ function Ecran(props) {
                                     name="rotate"
                                     value={control.get("rotate").name}
                                     onClick={onSelectInput}
-                                    readOnly
                                     type="text"
                                     size={6}
                                     maxLength={1}
+                                    ref={refRotateInput}
+                                    readOnly
                                 />
                             </div>
                         </div>
                         <button
                             className="button1"
                             onClick={() => {
+                                setChange("");
                                 setChoice(0);
                             }}
+                            ref={refRetour}
                         >
                             RETOUR
                         </button>

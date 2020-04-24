@@ -1,5 +1,5 @@
 import React, { Fragment, useRef, useEffect } from "react";
-import "../css/App.css";
+import "./HighScore.css";
 
 function HighScore(props) {
     //référence qui est utilisé afin d'avoir le focus sur un input
@@ -25,17 +25,12 @@ function HighScore(props) {
                              */}
                             {props.indexBorder === index ? (
                                 <input
+                                    className="redInput"
                                     type="text"
                                     size={10}
                                     maxLength={10}
                                     value={el.name}
                                     onChange={handleChange}
-                                    style={{
-                                        borderWidth: 2,
-                                        borderStyle: "solid",
-                                        borderColor: "red",
-                                        textAlign: "center",
-                                    }}
                                     ref={refInput}
                                 ></input>
                             ) : (

@@ -1,17 +1,18 @@
 import React, { useEffect, useRef, Fragment, useState } from "react";
-import "../css/App.css";
-import Menu from "./Menu";
-import Board from "./Board";
-import PauseScreen from "./PauseScreen";
-import useInterval from "../hooks/useInteval";
-import useEvent from "../hooks/useEvent";
-import { CANVAS, TETRIS, tokenModels, color } from "../asset/variable";
+import "../../css/App.css";
+import "./Game.css";
+import Menu from "../Menu/Menu";
+import Board from "../Board";
+import PauseScreen from "../PauseScreen/PauseScreen";
+import useInterval from "../../hooks/useInteval";
+import useEvent from "../../hooks/useEvent";
+import { CANVAS, TETRIS, tokenModels, color } from "../../asset/variable";
 import { faPause, faPlay } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Score from "./Score";
-import GameOverScreen from "./GameOver";
-import musicOriginal from "../asset/tetrisOriginal.mp3";
-import music99 from "../asset/tetris99.mp3";
+import Score from "../Score";
+import GameOverScreen from "../GameOver/GameOver";
+import musicOriginal from "../../asset/tetrisOriginal.mp3";
+import music99 from "../../asset/tetris99.mp3";
 
 let music = null;
 function Ecran() {
@@ -54,6 +55,8 @@ function Ecran() {
     const [audio, setAudio] = useState("");
     //volume de la musique
     const [volume, setVolume] = useState(0);
+    //commande
+    const [control, setControl] = useState([]);
 
     //permet de lancer la musique ou de l'arrêter en fonction de la variable audio
     useEffect(() => {
@@ -147,7 +150,7 @@ function Ecran() {
             switch (event.keyCode) {
                 //bouton gauche
                 //déplace une pièce à gauche si cela est possible
-                case 37:
+                case control[0]:
                     setRotation(true);
                     if (valid(token.piece, ereaseToken(), -1, 0)) {
                         move(-1);
@@ -156,12 +159,12 @@ function Ecran() {
                     break;
                 //bouton haut
                 //permet de faire tourner une pièce si c'est possibe
-                case 38:
+                case control[3]:
                     rotation();
                     break;
                 //bouton de droite
                 //déplace une pièce à droite si cela est possible
-                case 39:
+                case control[1]:
                     setRotation(true);
                     if (valid(token.piece, ereaseToken(), 1, 0)) {
                         move(1);
@@ -170,7 +173,7 @@ function Ecran() {
                     break;
                 //bouton du bas
                 //accélère la chute d'une pièce
-                case 40:
+                case control[2]:
                     setRotation(true);
                     setSpeed(true);
                     break;
@@ -500,6 +503,7 @@ function Ecran() {
         }
         return count;
     };
+
     //taille en longueur de la pièce qui va tomber
     const lengthPiece = (piece) => {
         let count = 0;
@@ -515,7 +519,9 @@ function Ecran() {
     };
 
     //fonction qui lance le jeu
-    const play = (volume, music) => {
+    const play = (volume, music, initControl) => {
+        const controlCopy = JSON.parse(JSON.stringify(initControl));
+        setControl(controlCopy);
         setVolume(volume);
         setAudio(music);
         setPlaying(true);
@@ -540,6 +546,8 @@ function Ecran() {
             if (newVolume !== volume) {
                 setVolume(newVolume);
             }
+        } else if ((newAudio === null && music !== null) || newAudio === audio) {
+            music.play();
         }
     };
     //fonction permettant de quitter le jeu
@@ -590,16 +598,6 @@ function Ecran() {
         return null;
     };
 
-    /*  const modifyIconPause = () => {
-        if (audio !== "" || music != null) {
-            if (music.paused) {
-                return faVolumeUp;
-            }
-            return faVolumeMute;
-        } else {
-            return faVolumeUp;
-        }
-    }; */
     useInterval(() => {
         falling();
     }, interval());

@@ -1,6 +1,6 @@
 import React, { Fragment, useState, useEffect } from "react";
-import "../css/App.css";
-import HighScore from "./HighScore";
+import "./GameOver.css";
+import HighScore from "../HighScore/HighScore";
 //boolean qui permet d'éxecuter une fonction une seule fois
 let didOnce = false;
 
@@ -86,21 +86,11 @@ function GameOver(props) {
                     indexBorder={isOnHighscore}
                     changeParent={changeText}
                 ></HighScore>
-                <div
-                    style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        justifyContent: "center",
-                        alignContent: "center",
-                        alignItems: "center",
-                        margin: 0,
-                    }}
-                >
-                    <button className="button2" onClick={handleQuit}>
-                        {" "}
-                        Quitter
-                    </button>
-                </div>
+
+                <button className="button2" onClick={handleQuit}>
+                    {" "}
+                    Quitter
+                </button>
             </div>
         </Fragment>
     );

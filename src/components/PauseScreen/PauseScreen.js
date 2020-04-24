@@ -1,6 +1,6 @@
 import React, { Fragment, useState } from "react";
-import "../css/App.css";
-
+import "./PauseScreen.css";
+import "../../css/App.css";
 function Ecran(props) {
     const [choice, setChoice] = useState(0);
     const [music, setMusic] = useState(null);
@@ -30,13 +30,12 @@ function Ecran(props) {
             setVolume(e.target.value);
         }
     };
-    console.log(music);
     switch (choice) {
         case 0:
             return (
                 <Fragment>
                     <div className="pauseScreen">
-                        <h3 style={{ margin: 10 }}>PAUSE</h3>
+                        <h3>PAUSE</h3>
                         <button
                             className="button2"
                             onClick={() => {
@@ -78,18 +77,9 @@ function Ecran(props) {
             return (
                 <Fragment>
                     <div className="pauseScreen">
-                        <h3 style={{ margin: 10 }}>PAUSE</h3>
-                        <h3 style={{ fontSize: 20 }}>MUSIQUE</h3>
-                        <div
-                            style={{
-                                display: "flex",
-                                flexDirection: "row",
-                                justifyContent: "space-around",
-                                minWidth: 250,
-                                marginBottom: 15,
-                                fontSize: 16,
-                            }}
-                        >
+                        <h3>PAUSE</h3>
+                        <h4>MUSIQUE</h4>
+                        <div className="musicSelector">
                             <label>
                                 <input
                                     type="radio"
@@ -127,18 +117,18 @@ function Ecran(props) {
                                 Moderne
                             </label>
                         </div>
-                        <input
-                            type="range"
-                            name="volume"
-                            min="0"
-                            max="20"
-                            value={volume}
-                            onChange={changeVolume}
-                            style={{ margin: 5 }}
-                        />
-                        <label htmlFor="volume" style={{ fontSize: 18 }}>
-                            Volume : {volume * 5}
-                        </label>
+                        <div className="volume">
+                            <input
+                                type="range"
+                                name="volume"
+                                min="0"
+                                max="20"
+                                value={volume}
+                                onChange={changeVolume}
+                            />
+                            <label htmlFor="volume">Volume : {volume * 5}</label>
+                        </div>
+
                         <button
                             className="button2"
                             onClick={() => {

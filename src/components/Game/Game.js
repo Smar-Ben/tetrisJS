@@ -296,12 +296,12 @@ function Ecran() {
     const handlerUp = (event) => {
         //l'utilisateur relache la touche du bas,
         //alors on arrête l'accélèration de la pièce qui tombe
-        if (event.keyCode === 40 && speed === true) {
+        if (event.keyCode === control[2] && speed === true) {
             setSpeed(false);
             setRotation(false);
         }
         //fin de la rotation
-        else if (event.keyCode === 38 && hasRotated === true) {
+        else if (event.keyCode === control[3] && hasRotated === true) {
             setRotation(false);
         }
     };

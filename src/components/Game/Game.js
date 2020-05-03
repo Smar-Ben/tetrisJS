@@ -543,11 +543,12 @@ function Ecran() {
     const changeMusicPause = (newAudio, newVolume) => {
         if (audio !== newAudio && newAudio !== null) {
             setAudio(newAudio);
-            if (newVolume !== volume) {
-                setVolume(newVolume);
-            }
         } else if ((newAudio === null && music !== null) || newAudio === audio) {
             music.play();
+        }
+        console.log(newVolume);
+        if (newVolume !== volume) {
+            setVolume(newVolume);
         }
     };
     //fonction permettant de quitter le jeu

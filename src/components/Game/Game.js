@@ -546,7 +546,6 @@ function Ecran() {
         } else if ((newAudio === null && music !== null) || newAudio === audio) {
             music.play();
         }
-        console.log(newVolume);
         if (newVolume !== volume) {
             setVolume(newVolume);
         }
